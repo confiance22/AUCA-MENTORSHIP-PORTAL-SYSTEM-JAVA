@@ -17,6 +17,10 @@ public class LoginController {
 
     private void initController() {
         view.getLoginButton().addActionListener(e -> authenticateUser());
+        view.getRegisterButton().addActionListener(e -> {
+            view.dispose();
+            new view.RegisterView().setVisible(true);
+        });
     }
 
     private void authenticateUser() {
