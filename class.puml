@@ -1,0 +1,106 @@
+@startuml AUCA Mentorship Portal - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #000000
+skinparam classHeaderBackgroundColor #FFFFFF
+skinparam classHeaderFontColor #000000
+skinparam arrowColor #000000
+skinparam arrowThickness 1
+skinparam packageBackgroundColor #FFFFFF
+skinparam packageBorderColor #FFFFFF
+skinparam shadowing false
+skinparam class {
+    BorderColor #000000
+    BackgroundColor #FFFFFF
+    HeaderBackgroundColor #FFFFFF
+    FontColor #000000
+}
+
+title AUCA Mentorship Portal - Class Diagram
+
+class User {
+    -id: int
+    -firstName: string
+    -lastName: string
+    -email: string
+    -password: string
+    -role: string
+    -isActive: boolean
+    +register()
+    +login()
+    +updateProfile()
+}
+
+class MentorProfile {
+    -id: int
+    -department: string
+    -expertise: string
+    -bio: string
+    -isAvailable: boolean
+    +applyAsMentor()
+    +updateProfile()
+}
+
+class MentorshipProgram {
+    -id: int
+    -title: string
+    -description: string
+    -maxCapacity: int
+    -status: string
+    +createProgram()
+    +closeProgram()
+}
+
+class MentorshipSession {
+    -id: int
+    -scheduledAt: datetime
+    -duration: int
+    -status: string
+    -notes: string
+    +scheduleSession()
+    +cancelSession()
+    +completeSession()
+}
+
+class Notification {
+    -id: int
+    -otpCode: string
+    -message: string
+    -isRead: boolean
+    -expiresAt: datetime
+    +sendOTP()
+    +markAsRead()
+}
+
+class Feedback {
+    -id: int
+    -rating: int
+    -review: string
+    -createdAt: datetime
+    +submitFeedback()
+    +getFeedback()
+}
+
+User "1" --> "0..1" MentorProfile : has
+User "1" --> "0..*" MentorshipSession : books
+User "1" --> "0..*" MentorshipSession : mentors
+User "0..*" --> "0..*" MentorshipProgram : enrolled in
+User "1" --> "0..*" Notification : receives
+MentorshipSession "1" --> "0..1" Feedback : receives
+MentorshipSession "0..*" --> "1" MentorshipProgram : belongs to
+
+note right of User
+  role can be:
+  'admin', 'mentor'
+  or 'mentee'
+end note
+
+note bottom of MentorshipSession
+  status can be:
+  pending, accepted,
+  completed, cancelled
+end note
+
+@enduml
