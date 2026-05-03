@@ -16,8 +16,8 @@ public class OTPUtil {
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
     // Placeholders - replace with real credentials in production
-    private static final String SMTP_USERNAME = "your_email@gmail.com"; 
-    private static final String SMTP_PASSWORD = "your_app_password";
+    private static final String SMTP_USERNAME = "confianceufitamahoro22@gmail.com"; 
+    private static final String SMTP_PASSWORD = "yeet fatu drdi rxfy";
 
     private static final SecureRandom random = new SecureRandom();
 
