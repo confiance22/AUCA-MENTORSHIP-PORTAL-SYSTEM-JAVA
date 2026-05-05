@@ -4,6 +4,7 @@ import model.User;
 import util.ServiceRegistry;
 import util.ButtonStyleUtil;
 import util.DialogStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -102,10 +103,10 @@ public class MentorProfileModule extends JPanel {
                 currentUser.setPhoneNumber(phone.getText().trim());
 
                 ServiceRegistry.userService.updateUserRecord(currentUser);
-                JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+                MessageDialogUtil.showSuccess(this, "Profile updated successfully!");
                 initComponents(); 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error updating profile: " + ex.getMessage());
+                MessageDialogUtil.showError(this, "Error updating profile: " + ex.getMessage());
             }
         }
     }

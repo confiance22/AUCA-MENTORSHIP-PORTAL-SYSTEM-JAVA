@@ -3,6 +3,7 @@ package view;
 import model.User;
 import util.ServiceRegistry;
 import util.ButtonStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileOutputStream;
@@ -67,10 +68,10 @@ public class ReportModule extends JPanel {
                     try (FileOutputStream fos = new FileOutputStream(file)) {
                         fos.write(data);
                     }
-                    JOptionPane.showMessageDialog(this, "Report saved successfully!");
+                    MessageDialogUtil.showSuccess(this, "Report saved successfully!");
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error generating report: " + ex.getMessage());
+                MessageDialogUtil.showError(this, "Error generating report: " + ex.getMessage());
             }
         }
     }

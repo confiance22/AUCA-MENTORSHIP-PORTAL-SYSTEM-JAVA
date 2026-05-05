@@ -3,6 +3,7 @@ package view;
 import model.User;
 import model.Notification;
 import util.ServiceRegistry;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -44,7 +45,6 @@ public class OTPVerificationView extends JFrame {
             new EmptyBorder(40, 40, 40, 40)
         ));
 
-        // 1. Icon Header (Simulated with Text)
         JLabel iconLabel = new JLabel("🔒", SwingConstants.CENTER);
         iconLabel.setFont(new Font("Segoe UI", Font.PLAIN, 48));
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -60,7 +60,6 @@ public class OTPVerificationView extends JFrame {
         infoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         infoLabel.setBorder(new EmptyBorder(10, 0, 30, 0));
 
-        // 2. OTP Field
         otpField = new JTextField();
         otpField.setFont(new Font("Segoe UI", Font.BOLD, 28));
         otpField.setHorizontalAlignment(JTextField.CENTER);
@@ -71,7 +70,6 @@ public class OTPVerificationView extends JFrame {
             new EmptyBorder(5, 5, 5, 5)
         ));
 
-        // 3. Verify Button
         verifyButton = new JButton("Verify & Activate");
         verifyButton.setMaximumSize(new Dimension(250, 50));
         verifyButton.setPreferredSize(new Dimension(250, 50));
@@ -83,7 +81,6 @@ public class OTPVerificationView extends JFrame {
         verifyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         verifyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Assembly
         card.add(iconLabel);
         card.add(Box.createRigidArea(new Dimension(0, 10)));
         card.add(titleLabel);
@@ -111,15 +108,14 @@ public class OTPVerificationView extends JFrame {
 
                 ServiceRegistry.notificationService.notifyAdmins("New User Activated: " + userToVerify.getFirstName() + " (" + userToVerify.getRole() + ")");
 
-                JOptionPane.showMessageDialog(this, "Account activated successfully! You can now log in.");
+                MessageDialogUtil.showSuccess(this, "Account activated successfully! You can now log in.");
                 this.dispose();
                 new LoginView().setVisible(true);
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid or expired OTP code. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                MessageDialogUtil.showError(this, "Invalid or expired OTP code. Please try again.");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Connection error: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Connection error: " + ex.getMessage());
         }
     }
 

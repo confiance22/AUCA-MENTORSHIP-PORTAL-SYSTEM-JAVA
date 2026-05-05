@@ -5,6 +5,7 @@ import model.User;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
 import util.ButtonStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -80,14 +81,14 @@ public class NotificationModule extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading notifications: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error loading notifications: " + ex.getMessage());
         }
     }
 
     private void markAsRead() {
         int selectedRow = notifTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a notification.");
+            MessageDialogUtil.showWarning(this, "Please select a notification.");
             return;
         }
         
@@ -96,7 +97,7 @@ public class NotificationModule extends JPanel {
             ServiceRegistry.notificationService.markNotificationAsRead(id);
             loadNotifications();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error: " + ex.getMessage());
         }
     }
 
@@ -105,7 +106,7 @@ public class NotificationModule extends JPanel {
             ServiceRegistry.notificationService.markAllReadNotificationRecordsByUserId(currentUser.getId());
             loadNotifications();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error: " + ex.getMessage());
         }
     }
 }

@@ -12,6 +12,7 @@ import util.ServiceRegistry;
 import util.TableStyleUtil;
 import util.ButtonStyleUtil;
 import util.DialogStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -110,7 +111,7 @@ public class ProgramModule extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading programs: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error loading programs: " + ex.getMessage());
         }
     }
 
@@ -135,7 +136,7 @@ public class ProgramModule extends JPanel {
             String capStr = capacityField.getText();
             
             if (title.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Title is required.");
+                MessageDialogUtil.showWarning(this, "Title is required.");
                 return;
             }
 
@@ -154,11 +155,11 @@ public class ProgramModule extends JPanel {
                 
                 ServiceRegistry.notificationService.notifyAdmins("New Mentorship Program Proposed: " + title + " (by Mentor " + currentUser.getFirstName() + ")");
 
-                JOptionPane.showMessageDialog(this, "Program '" + title + "' created successfully!");
+                MessageDialogUtil.showSuccess(this, "Program '" + title + "' created successfully!");
                 loadPrograms();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error creating program: " + ex.getMessage());
+                MessageDialogUtil.showError(this, "Error creating program: " + ex.getMessage());
             }
         }
     }
@@ -166,14 +167,14 @@ public class ProgramModule extends JPanel {
     private void enrollInProgram() {
         int selectedRow = programTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a program to enroll.");
+            MessageDialogUtil.showWarning(this, "Please select a program to enroll.");
             return;
         }
         
         Long programId = (Long) tableModel.getValueAt(selectedRow, 0);
         String programTitle = (String) tableModel.getValueAt(selectedRow, 1);
         
-        int confirm = JOptionPane.showConfirmDialog(this, "Do you want to enroll in '" + programTitle + "'?", "Enrollment", JOptionPane.YES_NO_OPTION);
+        int confirm = MessageDialogUtil.showConfirm(this, "Do you want to enroll in '" + programTitle + "'?", "Enrollment");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 MentorshipProgram searchP = new MentorshipProgram();
@@ -194,7 +195,7 @@ public class ProgramModule extends JPanel {
                     }
                     
                     if (alreadyEnrolled) {
-                        JOptionPane.showMessageDialog(this, "You are already enrolled in this program.");
+                        MessageDialogUtil.showWarning(this, "You are already enrolled in this program.");
                     } else {
                         program.getEnrolledUsers().add(currentUser);
                         ServiceRegistry.mentorshipProgramService.updateMentorshipProgramRecord(program);
@@ -206,13 +207,13 @@ public class ProgramModule extends JPanel {
                         notif.setCreatedAt(LocalDateTime.now());
                         ServiceRegistry.notificationService.registerNotificationRecord(notif);
 
-                        JOptionPane.showMessageDialog(this, "Successfully enrolled in " + programTitle + "!");
+                        MessageDialogUtil.showSuccess(this, "Successfully enrolled in " + programTitle + "!");
                         loadPrograms();
                     }
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error enrolling in program: " + ex.getMessage());
+                MessageDialogUtil.showError(this, "Error enrolling in program: " + ex.getMessage());
             }
         }
     }
@@ -220,7 +221,7 @@ public class ProgramModule extends JPanel {
     private void bookSession() {
         int selectedRow = programTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a program to book a session.");
+            MessageDialogUtil.showWarning(this, "Please select a program to book a session.");
             return;
         }
 
@@ -242,7 +243,7 @@ public class ProgramModule extends JPanel {
                 }
 
                 if (!isEnrolled) {
-                    JOptionPane.showMessageDialog(this, "You must enroll in the program before booking a session.");
+                    MessageDialogUtil.showWarning(this, "You must enroll in the program before booking a session.");
                     return;
                 }
 
@@ -264,18 +265,18 @@ public class ProgramModule extends JPanel {
                 notif.setCreatedAt(LocalDateTime.now());
                 ServiceRegistry.notificationService.registerNotificationRecord(notif);
 
-                JOptionPane.showMessageDialog(this, "Session booked successfully for " + session.getScheduledAt() + "!\nMentor " + program.getCreatedBy().getFirstName() + " has been notified.");
+                MessageDialogUtil.showSuccess(this, "Session booked successfully for " + session.getScheduledAt() + "!\nMentor " + program.getCreatedBy().getFirstName() + " has been notified.");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error booking session: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error booking session: " + ex.getMessage());
         }
     }
 
     private void deleteProgram() {
         int selectedRow = programTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a program to delete.");
+            MessageDialogUtil.showWarning(this, "Please select a program to delete.");
             return;
         }
 
@@ -284,10 +285,10 @@ public class ProgramModule extends JPanel {
             MentorshipProgram p = new MentorshipProgram();
             p.setId(id);
             ServiceRegistry.mentorshipProgramService.deleteMentorshipProgramRecord(p);
-            JOptionPane.showMessageDialog(this, "Program deleted.");
+            MessageDialogUtil.showSuccess(this, "Program deleted.");
             loadPrograms();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error deleting program: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error deleting program: " + ex.getMessage());
         }
     }
 }

@@ -5,6 +5,7 @@ import model.UserRole;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
 import util.ButtonStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -70,29 +71,29 @@ public class UserModule extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading users: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error loading users: " + ex.getMessage());
         }
     }
 
     private void deleteSelectedUser() {
         int selectedRow = userTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a user to delete.");
+            MessageDialogUtil.showWarning(this, "Please select a user to delete.");
             return;
         }
 
         Long id = (Long) tableModel.getValueAt(selectedRow, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete user ID " + id + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        int confirm = MessageDialogUtil.showConfirm(this, "Are you sure you want to delete user ID " + id + "?", "Confirm Delete");
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 User userToDelete = new User();
                 userToDelete.setId(id);
                 ServiceRegistry.userService.deleteUserRecord(userToDelete);
-                JOptionPane.showMessageDialog(this, "User deleted successfully.");
+                MessageDialogUtil.showSuccess(this, "User deleted successfully.");
                 loadUsers();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error deleting user: " + ex.getMessage());
+                MessageDialogUtil.showError(this, "Error deleting user: " + ex.getMessage());
             }
         }
     }

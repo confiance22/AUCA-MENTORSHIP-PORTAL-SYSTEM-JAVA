@@ -10,6 +10,7 @@ import model.UserRole;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
 import util.ButtonStyleUtil;
+import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -100,20 +101,20 @@ public class SessionModule extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading sessions: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error loading sessions: " + ex.getMessage());
         }
     }
 
     private void leaveFeedback() {
         int selectedRow = sessionTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a session.");
+            MessageDialogUtil.showWarning(this, "Please select a session.");
             return;
         }
 
         String status = tableModel.getValueAt(selectedRow, 4).toString();
         if (!status.equals("COMPLETED")) {
-            JOptionPane.showMessageDialog(this, "You can only leave feedback for COMPLETED sessions.");
+            MessageDialogUtil.showWarning(this, "You can only leave feedback for COMPLETED sessions.");
             return;
         }
 
@@ -126,15 +127,15 @@ public class SessionModule extends JPanel {
             if (session != null) {
                 MentorshipFeedback existing = ServiceRegistry.mentorshipFeedbackService.findFeedbackRecordBySessionId(id);
                 if (existing != null) {
-                    JOptionPane.showMessageDialog(this, "You have already left feedback for this session.");
+                    MessageDialogUtil.showWarning(this, "You have already left feedback for this session.");
                     return;
                 }
 
-                String ratingStr = JOptionPane.showInputDialog(this, "Enter Rating (1-5):");
+                String ratingStr = MessageDialogUtil.showInput(this, "Enter Rating (1-5):", "Session Feedback");
                 if (ratingStr == null) return;
                 int rating = Integer.parseInt(ratingStr);
                 
-                String comment = JOptionPane.showInputDialog(this, "Enter Comment:");
+                String comment = MessageDialogUtil.showInput(this, "Enter Comment:", "Session Feedback");
                 if (comment == null) return;
 
                 MentorshipFeedback feedback = new MentorshipFeedback();
@@ -144,17 +145,17 @@ public class SessionModule extends JPanel {
                 feedback.setCreatedAt(LocalDateTime.now());
 
                 ServiceRegistry.mentorshipFeedbackService.registerFeedbackRecord(feedback);
-                JOptionPane.showMessageDialog(this, "Thank you for your feedback!");
+                MessageDialogUtil.showSuccess(this, "Thank you for your feedback!");
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error: " + ex.getMessage());
         }
     }
 
     private void completeSession() {
         int selectedRow = sessionTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a session.");
+            MessageDialogUtil.showWarning(this, "Please select a session.");
             return;
         }
 
@@ -175,18 +176,18 @@ public class SessionModule extends JPanel {
                 notif.setCreatedAt(LocalDateTime.now());
                 ServiceRegistry.notificationService.registerNotificationRecord(notif);
                 
-                JOptionPane.showMessageDialog(this, "Session marked as COMPLETED! Mentee notified.");
+                MessageDialogUtil.showSuccess(this, "Session marked as COMPLETED! Mentee notified.");
                 loadSessions();
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error updating session: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error updating session: " + ex.getMessage());
         }
     }
 
     private void cancelSession() {
         int selectedRow = sessionTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a session.");
+            MessageDialogUtil.showWarning(this, "Please select a session.");
             return;
         }
 
@@ -198,7 +199,7 @@ public class SessionModule extends JPanel {
             
             if (session != null) {
                 if (session.getStatus() != SessionStatus.SCHEDULED) {
-                    JOptionPane.showMessageDialog(this, "Only SCHEDULED sessions can be cancelled.");
+                    MessageDialogUtil.showWarning(this, "Only SCHEDULED sessions can be cancelled.");
                     return;
                 }
 
@@ -212,11 +213,11 @@ public class SessionModule extends JPanel {
                 notif.setCreatedAt(LocalDateTime.now());
                 ServiceRegistry.notificationService.registerNotificationRecord(notif);
                 
-                JOptionPane.showMessageDialog(this, "Session CANCELLED! Mentee notified.");
+                MessageDialogUtil.showSuccess(this, "Session CANCELLED! Mentee notified.");
                 loadSessions();
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error cancelling session: " + ex.getMessage());
+            MessageDialogUtil.showError(this, "Error cancelling session: " + ex.getMessage());
         }
     }
 }
