@@ -17,7 +17,6 @@ public class RegisterView extends JFrame {
     private JButton registerButton;
     private JButton backToLoginButton;
 
-    // Consistency Colors
     private final Color PRIMARY_COLOR = new Color(30, 58, 138); 
     private final Color SUCCESS_COLOR = new Color(5, 150, 105); 
     private final Color BG_COLOR = new Color(243, 244, 246);
@@ -25,7 +24,7 @@ public class RegisterView extends JFrame {
 
     public RegisterView() {
         setTitle("AUCA Mentorship Portal - Create Account");
-        setSize(520, 720); // Slightly taller for more fields
+        setSize(800, 850); 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -41,147 +40,173 @@ public class RegisterView extends JFrame {
         wrapper.setBackground(BG_COLOR);
         wrapper.setBorder(new EmptyBorder(20, 20, 20, 20));
 
+        // --- THE "INSIDE" CARD ---
         JPanel card = new JPanel();
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setLayout(new GridBagLayout());
         card.setBackground(Color.WHITE);
+        card.setPreferredSize(new Dimension(600, 750)); 
         card.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(229, 231, 235), 1),
-            new EmptyBorder(25, 35, 30, 35)
+            new EmptyBorder(40, 60, 40, 60)
         ));
 
-        // Header
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.weightx = 1.0;
+
+        // 1. Header
         JLabel titleLabel = new JLabel("Join the Community", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
         titleLabel.setForeground(TEXT_COLOR);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        card.add(titleLabel, gbc);
         
-        JLabel subTitle = new JLabel("Experience mentorship like never before", SwingConstants.CENTER);
-        subTitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JLabel subTitle = new JLabel("Sign up to start your mentorship journey", SwingConstants.CENTER);
+        subTitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         subTitle.setForeground(Color.GRAY);
-        subTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        subTitle.setBorder(new EmptyBorder(5, 0, 25, 0));
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        card.add(subTitle, gbc);
 
-        // Assembly
-        card.add(titleLabel);
-        card.add(subTitle);
-
-        // Fields in Grid (Name Row)
-        JPanel namePanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        // 2. Name Row (Two columns)
+        JPanel namePanel = new JPanel(new GridLayout(1, 2, 15, 0));
         namePanel.setBackground(Color.WHITE);
-        namePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
         
-        firstNameField = createField("First Name", namePanel);
-        lastNameField = createField("Last Name", namePanel);
-        card.add(namePanel);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
-
-        emailField = createFullField("Email Address", card);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
+        firstNameField = createFieldInPanel("First Name", namePanel);
+        lastNameField = createFieldInPanel("Last Name", namePanel);
         
-        phoneField = createFullField("Phone Number", card);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(namePanel, gbc);
 
-        // Role Selector
-        card.add(createLabel("I want to join as:"));
+        // 3. Email
+        card.add(createLabel("Email Address"), createGbc(3));
+        emailField = createStyledTextField();
+        gbc.gridy = 4;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(emailField, gbc);
+
+        // 4. Phone
+        card.add(createLabel("Phone Number"), createGbc(5));
+        phoneField = createStyledTextField();
+        gbc.gridy = 6;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(phoneField, gbc);
+
+        // 5. Role
+        card.add(createLabel("I am joining as:"), createGbc(7));
         roleComboBox = new JComboBox<>(new String[]{"MENTOR", "MENTEE"});
         roleComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        roleComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        card.add(roleComboBox);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
+        roleComboBox.setPreferredSize(new Dimension(0, 40));
+        gbc.gridy = 8;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(roleComboBox, gbc);
 
-        passwordField = createFullPasswordField("Password", card);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
+        // 6. Password Row
+        JPanel passPanel = new JPanel(new GridLayout(1, 2, 15, 0));
+        passPanel.setBackground(Color.WHITE);
+        passwordField = createPasswordFieldInPanel("Password", passPanel);
+        confirmPasswordField = createPasswordFieldInPanel("Confirm Password", passPanel);
         
-        confirmPasswordField = createFullPasswordField("Confirm Password", card);
-        card.add(Box.createRigidArea(new Dimension(0, 25)));
+        gbc.gridy = 9;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        card.add(passPanel, gbc);
 
-        // Buttons
+        // 7. Buttons
         registerButton = new JButton("Create My Account");
         stylePrimaryButton(registerButton);
-        card.add(registerButton);
-        
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
+        gbc.gridy = 10;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        card.add(registerButton, gbc);
         
         backToLoginButton = new JButton("Already have an account? Sign In");
         styleSecondaryButton(backToLoginButton);
-        card.add(backToLoginButton);
+        gbc.gridy = 11;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        card.add(backToLoginButton, gbc);
 
         wrapper.add(card);
-        add(new JScrollPane(wrapper)); // Scrollable just in case
+        add(wrapper); // Removed JScrollPane
     }
 
-    private JTextField createField(String labelText, JPanel parent) {
+    private GridBagConstraints createGbc(int y) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = y;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        return gbc;
+    }
+
+    private JTextField createFieldInPanel(String labelText, JPanel parent) {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(Color.WHITE);
         p.add(createLabel(labelText), BorderLayout.NORTH);
         JTextField f = new JTextField();
-        f.setPreferredSize(new Dimension(100, 38));
+        f.setPreferredSize(new Dimension(100, 42));
         f.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(209, 213, 219), 1),
-            new EmptyBorder(5, 10, 5, 10)
+            new EmptyBorder(5, 12, 5, 12)
         ));
         p.add(f, BorderLayout.CENTER);
         parent.add(p);
         return f;
     }
 
-    private JTextField createFullField(String labelText, JPanel parent) {
-        parent.add(createLabel(labelText));
-        JTextField f = new JTextField();
-        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        f.setPreferredSize(new Dimension(300, 38));
+    private JPasswordField createPasswordFieldInPanel(String labelText, JPanel parent) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(Color.WHITE);
+        p.add(createLabel(labelText), BorderLayout.NORTH);
+        JPasswordField f = new JPasswordField();
+        f.setPreferredSize(new Dimension(100, 42));
         f.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(209, 213, 219), 1),
-            new EmptyBorder(5, 10, 5, 10)
+            new EmptyBorder(5, 12, 5, 12)
         ));
-        parent.add(f);
+        p.add(f, BorderLayout.CENTER);
+        parent.add(p);
         return f;
     }
 
-    private JPasswordField createFullPasswordField(String labelText, JPanel parent) {
-        parent.add(createLabel(labelText));
-        JPasswordField f = new JPasswordField();
-        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        f.setPreferredSize(new Dimension(300, 38));
-        f.setBorder(BorderFactory.createCompoundBorder(
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField();
+        field.setPreferredSize(new Dimension(300, 42));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        field.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(209, 213, 219), 1),
-            new EmptyBorder(5, 10, 5, 10)
+            new EmptyBorder(5, 12, 5, 12)
         ));
-        parent.add(f);
-        return f;
+        return field;
     }
 
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 12));
         label.setForeground(new Color(75, 85, 99));
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        label.setBorder(new EmptyBorder(5, 0, 3, 0));
         return label;
     }
 
     private void stylePrimaryButton(JButton btn) {
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-        btn.setPreferredSize(new Dimension(300, 45));
+        btn.setPreferredSize(new Dimension(380, 50));
         btn.setBackground(SUCCESS_COLOR);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
     private void styleSecondaryButton(JButton btn) {
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        btn.setPreferredSize(new Dimension(300, 40));
+        btn.setPreferredSize(new Dimension(380, 45));
         btn.setBackground(Color.WHITE);
         btn.setForeground(PRIMARY_COLOR);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
-        btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
     public JTextField getFirstNameField() { return firstNameField; }
