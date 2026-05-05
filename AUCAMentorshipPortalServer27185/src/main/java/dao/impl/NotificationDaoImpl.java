@@ -19,7 +19,7 @@ public class NotificationDaoImpl implements NotificationDao {
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            throw new RuntimeException("Database error saving notification: " + e.getMessage(), e);
         }
     }
 

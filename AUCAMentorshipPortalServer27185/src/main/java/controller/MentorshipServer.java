@@ -13,6 +13,8 @@ import service.impl.MentorshipSessionServiceImpl;
 import service.impl.NotificationServiceImpl;
 import service.impl.ReportServiceImpl;
 import service.impl.UserServiceImpl;
+import service.MentorshipFeedbackService;
+import service.impl.MentorshipFeedbackServiceImpl;
 
 import util.DataSeeder;
 import java.rmi.Naming;
@@ -46,6 +48,7 @@ public class MentorshipServer {
             MentorshipSessionService mentorshipSessionService = new MentorshipSessionServiceImpl();
             NotificationService notificationService = new NotificationServiceImpl();
             ReportService reportService = new ReportServiceImpl();
+            MentorshipFeedbackService feedbackService = new MentorshipFeedbackServiceImpl();
 
             // Bind services to RMI Registry
             Naming.rebind("rmi://localhost:1099/UserService", userService);
@@ -54,6 +57,7 @@ public class MentorshipServer {
             Naming.rebind("rmi://localhost:1099/MentorshipSessionService", mentorshipSessionService);
             Naming.rebind("rmi://localhost:1099/NotificationService", notificationService);
             Naming.rebind("rmi://localhost:1099/ReportService", reportService);
+            Naming.rebind("rmi://localhost:1099/MentorshipFeedbackService", feedbackService);
 
             System.out.println("All services bound successfully to the RMI Registry.");
 

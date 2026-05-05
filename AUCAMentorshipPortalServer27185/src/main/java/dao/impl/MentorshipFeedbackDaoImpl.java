@@ -1,38 +1,37 @@
 package dao.impl;
 
-import dao.UserDao;
-import model.User;
-import model.UserRole;
+import dao.MentorshipFeedbackDao;
+import model.MentorshipFeedback;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;
 import java.util.List;
 
-public class UserDaoImpl implements UserDao {
+public class MentorshipFeedbackDaoImpl implements MentorshipFeedbackDao {
 
     @Override
-    public void save(User user) {
+    public void save(MentorshipFeedback feedback) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.persist(user);
+            session.persist(feedback);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            throw new RuntimeException("Database error saving user: " + e.getMessage(), e);
+            throw new RuntimeException("Error saving feedback: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void update(User user) {
+    public void update(MentorshipFeedback feedback) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.merge(user);
+            session.merge(feedback);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            throw new RuntimeException("Database error updating user: " + e.getMessage(), e);
+            throw new RuntimeException("Error updating feedback: " + e.getMessage(), e);
         }
     }
 
@@ -41,33 +40,20 @@ public class UserDaoImpl implements UserDao {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            User user = session.get(User.class, id);
-            if (user != null) {
-                session.remove(user);
-            }
+            MentorshipFeedback feedback = session.get(MentorshipFeedback.class, id);
+            if (feedback != null) session.remove(feedback);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
-            e.printStackTrace();
+            throw new RuntimeException("Error deleting feedback: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public User findById(Long id) {
+    public MentorshipFeedback findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(User.class, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
-                "FROM User WHERE email = :email", User.class)
-                .setParameter("email", email)
+            return session.createQuery("SELECT f FROM MentorshipFeedback f LEFT JOIN FETCH f.session s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee WHERE f.id = :id", MentorshipFeedback.class)
+                .setParameter("id", id)
                 .uniqueResult();
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,9 +62,9 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> findAll() {
+    public List<MentorshipFeedback> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM User", User.class).list();
+            return session.createQuery("SELECT DISTINCT f FROM MentorshipFeedback f LEFT JOIN FETCH f.session s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee", MentorshipFeedback.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -86,29 +72,26 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> findByRole(UserRole role) {
+    public MentorshipFeedback findBySessionId(Long sessionId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
-                "FROM User WHERE role = :role", User.class)
-                .setParameter("role", role)
+            return session.createQuery("SELECT f FROM MentorshipFeedback f WHERE f.session.id = :sessionId", MentorshipFeedback.class)
+                .setParameter("sessionId", sessionId)
+                .uniqueResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<MentorshipFeedback> findByMentorId(Long mentorId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("SELECT f FROM MentorshipFeedback f WHERE f.session.mentor.id = :mentorId", MentorshipFeedback.class)
+                .setParameter("mentorId", mentorId)
                 .list();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    @Override
-    public boolean existsByEmail(String email) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Long count = session.createQuery(
-                "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class)
-                .setParameter("email", email)
-                .uniqueResult();
-            return count != null && count > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
     }
 }

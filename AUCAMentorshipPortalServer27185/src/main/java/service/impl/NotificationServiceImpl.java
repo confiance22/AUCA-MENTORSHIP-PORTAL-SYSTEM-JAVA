@@ -76,25 +76,35 @@ public class NotificationServiceImpl extends UnicastRemoteObject implements Noti
 
     @Override
     public void sendOtpNotification(Long userId, String email) throws RemoteException {
-        User user = userDao.findById(userId);
-        if (user == null) {
-            throw new RemoteException("User not found");
+        try {
+            User user = userDao.findById(userId);
+            if (user == null) {
+                throw new RemoteException("User not found");
+            }
+
+            String otp = OTPUtil.generateOTP();
+
+            // Create notification
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setType(NotificationType.OTP);
+            notification.setMessage("Your OTP verification code is: " + otp);
+            notification.setOtpCode(otp);
+            notification.setCreatedAt(LocalDateTime.now());
+            notification.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+            notification.setUsed(false);
+            notification.setRead(false);
+            
+            notificationDao.save(notification);
+
+            // Send via ActiveMQ
+            String message = "OTP|" + email + "|" + otp;
+            ActiveMQProducer.sendNotification(message);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Error sending OTP: " + e.getMessage());
         }
-
-        String otp = OTPUtil.generateOTP();
-
-        // Save to DB
-        Notification notification = new Notification();
-        notification.setUser(user);
-        notification.setType(NotificationType.OTP);
-        notification.setMessage("Your OTP code has been generated.");
-        notification.setOtpCode(otp);
-        notification.setExpiresAt(LocalDateTime.now().plusMinutes(5));
-        notificationDao.save(notification);
-
-        // Send via ActiveMQ
-        String message = "OTP|" + email + "|" + otp;
-        ActiveMQProducer.sendNotification(message);
     }
 
     private Notification cleanNotification(Notification notification) {

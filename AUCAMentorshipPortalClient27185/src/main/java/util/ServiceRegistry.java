@@ -9,4 +9,5 @@ public class ServiceRegistry {
     public static MentorshipSessionService mentorshipSessionService;
     public static NotificationService notificationService;
     public static ReportService reportService;
+    public static MentorshipFeedbackService mentorshipFeedbackService;
 }

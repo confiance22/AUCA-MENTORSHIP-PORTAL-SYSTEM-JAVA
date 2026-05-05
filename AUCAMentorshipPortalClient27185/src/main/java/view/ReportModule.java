@@ -4,6 +4,8 @@ import model.User;
 import util.ServiceRegistry;
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileOutputStream;
+import java.io.File;
 
 public class ReportModule extends JPanel {
     private User currentUser;
@@ -19,25 +21,49 @@ public class ReportModule extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setLayout(new GridLayout(0, 1, 10, 10));
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         
-        contentPanel.add(new JLabel("Available Reports:"));
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        JButton usersPdfBtn = new JButton("Export All Users (PDF)");
+        JButton programsExcelBtn = new JButton("Export All Programs (Excel)");
+        JButton sessionsPdfBtn = new JButton("Export Session Logs (PDF)");
+        JButton feedbackPdfBtn = new JButton("Export Session Feedback (PDF)");
         
-        JButton genPdfBtn = new JButton("Generate Mentorship Summary (PDF)");
-        JButton genExcelBtn = new JButton("Export Session Logs (Excel)");
-        
-        contentPanel.add(genPdfBtn);
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        contentPanel.add(genExcelBtn);
+        contentPanel.add(usersPdfBtn);
+        contentPanel.add(programsExcelBtn);
+        contentPanel.add(sessionsPdfBtn);
+        contentPanel.add(feedbackPdfBtn);
 
-        genPdfBtn.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Report generation started... Check server console for progress.");
-            // In a real app, call ServiceRegistry.reportService.generateSummaryReport();
-        });
+        usersPdfBtn.addActionListener(e -> downloadReport("users_report.pdf", "PDF"));
+        programsExcelBtn.addActionListener(e -> downloadReport("programs_report.xlsx", "Excel"));
+        sessionsPdfBtn.addActionListener(e -> downloadReport("sessions_report.pdf", "PDF"));
+        feedbackPdfBtn.addActionListener(e -> downloadReport("feedback_report.pdf", "PDF"));
 
         add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private void downloadReport(String defaultName, String type) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(new File(defaultName));
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+                byte[] data = null;
+                if (defaultName.contains("users")) data = ServiceRegistry.reportService.exportUsersToPdf();
+                else if (defaultName.contains("programs")) data = ServiceRegistry.reportService.exportProgramsToExcel();
+                else if (defaultName.contains("sessions")) data = ServiceRegistry.reportService.exportSessionsToPdf();
+                else if (defaultName.contains("feedback")) data = ServiceRegistry.reportService.exportFeedbackToPdf();
+
+                if (data != null) {
+                    try (FileOutputStream fos = new FileOutputStream(file)) {
+                        fos.write(data);
+                    }
+                    JOptionPane.showMessageDialog(this, "Report saved successfully!");
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error generating report: " + ex.getMessage());
+            }
+        }
     }
 }

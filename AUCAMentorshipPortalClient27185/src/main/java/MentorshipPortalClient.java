@@ -16,6 +16,7 @@ public class MentorshipPortalClient {
             ServiceRegistry.mentorshipSessionService = (MentorshipSessionService) Naming.lookup("rmi://localhost:1099/MentorshipSessionService");
             ServiceRegistry.notificationService = (NotificationService) Naming.lookup("rmi://localhost:1099/NotificationService");
             ServiceRegistry.reportService = (ReportService) Naming.lookup("rmi://localhost:1099/ReportService");
+            ServiceRegistry.mentorshipFeedbackService = (MentorshipFeedbackService) Naming.lookup("rmi://localhost:1099/MentorshipFeedbackService");
 
             System.out.println("Successfully connected to the AUCA Mentorship Portal Server (RMI)!");
 

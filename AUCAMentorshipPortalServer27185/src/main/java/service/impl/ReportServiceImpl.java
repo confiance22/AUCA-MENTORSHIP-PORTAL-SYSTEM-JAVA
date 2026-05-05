@@ -2,10 +2,16 @@ package service.impl;
 
 import dao.MentorshipProgramDao;
 import dao.UserDao;
+import dao.MentorshipSessionDao;
+import dao.MentorshipFeedbackDao;
 import dao.impl.MentorshipProgramDaoImpl;
 import dao.impl.UserDaoImpl;
+import dao.impl.MentorshipSessionDaoImpl;
+import dao.impl.MentorshipFeedbackDaoImpl;
 import model.MentorshipProgram;
 import model.User;
+import model.MentorshipSession;
+import model.MentorshipFeedback;
 import service.ReportService;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -28,11 +34,15 @@ public class ReportServiceImpl extends UnicastRemoteObject implements ReportServ
 
     private final UserDao userDao;
     private final MentorshipProgramDao mentorshipProgramDao;
+    private final MentorshipSessionDao mentorshipSessionDao;
+    private final MentorshipFeedbackDao mentorshipFeedbackDao;
 
     public ReportServiceImpl() throws RemoteException {
         super();
         this.userDao = new UserDaoImpl();
         this.mentorshipProgramDao = new MentorshipProgramDaoImpl();
+        this.mentorshipSessionDao = new MentorshipSessionDaoImpl();
+        this.mentorshipFeedbackDao = new MentorshipFeedbackDaoImpl();
     }
 
     @Override
@@ -43,7 +53,7 @@ public class ReportServiceImpl extends UnicastRemoteObject implements ReportServ
             Document document = new Document(pdf);
 
             document.add(new Paragraph("Mentorship Portal - Users Report").setBold().setFontSize(16));
-            document.add(new Paragraph(" ")); // empty line
+            document.add(new Paragraph(" "));
 
             List<User> users = userDao.findAll();
 
@@ -63,10 +73,8 @@ public class ReportServiceImpl extends UnicastRemoteObject implements ReportServ
 
             document.add(table);
             document.close();
-
             return baos.toByteArray();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RemoteException("Error generating PDF: " + e.getMessage());
         }
     }
@@ -95,8 +103,77 @@ public class ReportServiceImpl extends UnicastRemoteObject implements ReportServ
             workbook.write(baos);
             return baos.toByteArray();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RemoteException("Error generating Excel: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public byte[] exportSessionsToPdf() throws RemoteException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            document.add(new Paragraph("Mentorship Portal - Sessions Report").setBold().setFontSize(16));
+            document.add(new Paragraph(" "));
+
+            List<MentorshipSession> sessions = mentorshipSessionDao.findAll();
+
+            float[] pointColumnWidths = {50F, 120F, 120F, 120F, 100F};
+            Table table = new Table(pointColumnWidths);
+            table.addCell("ID");
+            table.addCell("Mentor");
+            table.addCell("Mentee");
+            table.addCell("Time");
+            table.addCell("Status");
+
+            for (MentorshipSession s : sessions) {
+                table.addCell(String.valueOf(s.getId()));
+                table.addCell(s.getMentor() != null ? s.getMentor().getFirstName() : "N/A");
+                table.addCell(s.getMentee() != null ? s.getMentee().getFirstName() : "N/A");
+                table.addCell(s.getScheduledAt() != null ? s.getScheduledAt().toString() : "N/A");
+                table.addCell(s.getStatus().name());
+            }
+
+            document.add(table);
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RemoteException("Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public byte[] exportFeedbackToPdf() throws RemoteException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            document.add(new Paragraph("Mentorship Portal - Session Feedback Report").setBold().setFontSize(16));
+            document.add(new Paragraph(" "));
+
+            List<MentorshipFeedback> feedbacks = mentorshipFeedbackDao.findAll();
+
+            float[] pointColumnWidths = {50F, 120F, 50F, 250F};
+            Table table = new Table(pointColumnWidths);
+            table.addCell("ID");
+            table.addCell("Session ID");
+            table.addCell("Rating");
+            table.addCell("Comment");
+
+            for (MentorshipFeedback f : feedbacks) {
+                table.addCell(String.valueOf(f.getId()));
+                table.addCell(f.getSession() != null ? String.valueOf(f.getSession().getId()) : "N/A");
+                table.addCell(String.valueOf(f.getRating()));
+                table.addCell(f.getComment());
+            }
+
+            document.add(table);
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RemoteException("Error: " + e.getMessage());
         }
     }
 }

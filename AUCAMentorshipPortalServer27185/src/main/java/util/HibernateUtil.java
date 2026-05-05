@@ -7,6 +7,7 @@ import model.Notification;
 import model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import model.MentorshipFeedback;
 
 public class HibernateUtil {
 
@@ -23,6 +24,7 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(MentorshipProgram.class);
                 configuration.addAnnotatedClass(MentorshipSession.class);
                 configuration.addAnnotatedClass(Notification.class);
+                configuration.addAnnotatedClass(MentorshipFeedback.class);
 
                 sessionFactory = configuration.buildSessionFactory();
                 System.out.println("Hibernate SessionFactory created successfully.");
