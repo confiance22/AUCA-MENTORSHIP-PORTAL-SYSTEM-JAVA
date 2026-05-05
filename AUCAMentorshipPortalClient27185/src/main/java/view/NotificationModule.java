@@ -6,6 +6,7 @@ import util.ServiceRegistry;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import util.TableStyleUtil;
 import java.util.List;
 
 public class NotificationModule extends JPanel {
@@ -19,14 +20,22 @@ public class NotificationModule extends JPanel {
         setBackground(Color.WHITE);
         
         JLabel titleLabel = new JLabel("My Notifications", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        // Table setup
-        String[] columnNames = {"Message", "Date", "Status"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+        // Table setup - hidden ID column
+        String[] columnNames = {"ID", "Message", "Date", "Status"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
         notifTable = new JTable(tableModel);
+        TableStyleUtil.applyCustomStyle(notifTable);
+        
+        // Hide ID column
+        notifTable.removeColumn(notifTable.getColumnModel().getColumn(0));
+        
         add(new JScrollPane(notifTable), BorderLayout.CENTER);
 
         // Buttons
@@ -35,12 +44,15 @@ public class NotificationModule extends JPanel {
         
         JButton refreshBtn = new JButton("Refresh");
         JButton markReadBtn = new JButton("Mark as Read");
+        JButton markAllReadBtn = new JButton("Mark All Read");
         
         refreshBtn.addActionListener(e -> loadNotifications());
         markReadBtn.addActionListener(e -> markAsRead());
+        markAllReadBtn.addActionListener(e -> markAllRead());
         
         buttonPanel.add(refreshBtn);
         buttonPanel.add(markReadBtn);
+        buttonPanel.add(markAllReadBtn);
         
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -54,7 +66,7 @@ public class NotificationModule extends JPanel {
             if (notifications != null) {
                 for (Notification n : notifications) {
                     tableModel.addRow(new Object[]{
-                        n.getMessage(), n.getCreatedAt(), n.isRead() ? "Read" : "New"
+                        n.getId(), n.getMessage(), n.getCreatedAt(), n.isRead() ? "Read" : "New"
                     });
                 }
             }
@@ -70,8 +82,21 @@ public class NotificationModule extends JPanel {
             return;
         }
         
-        // In a real app, you'd get the ID and update the status
-        JOptionPane.showMessageDialog(this, "Notification marked as read!");
-        loadNotifications();
+        try {
+            Long id = (Long) tableModel.getValueAt(selectedRow, 0);
+            ServiceRegistry.notificationService.markNotificationAsRead(id);
+            loadNotifications();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    private void markAllRead() {
+        try {
+            ServiceRegistry.notificationService.markAllReadNotificationRecordsByUserId(currentUser.getId());
+            loadNotifications();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
     }
 }

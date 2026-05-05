@@ -12,6 +12,7 @@ import util.ServiceRegistry;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import util.TableStyleUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,14 +34,18 @@ public class ProgramModule extends JPanel {
         else if (currentUser.getRole() == UserRole.ADMIN) title = "All Mentorship Programs";
 
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         // Table setup
         String[] columnNames = {"ID", "Title", "Mentor", "Start Date", "End Date", "Status"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
         programTable = new JTable(tableModel);
+        TableStyleUtil.applyCustomStyle(programTable);
         add(new JScrollPane(programTable), BorderLayout.CENTER);
 
         // Buttons
@@ -131,6 +136,10 @@ public class ProgramModule extends JPanel {
                 program.setCreatedAt(LocalDateTime.now());
                 
                 ServiceRegistry.mentorshipProgramService.registerMentorshipProgramRecord(program);
+                
+                // Notify Admins
+                ServiceRegistry.notificationService.notifyAdmins("New Mentorship Program Proposed: " + title + " (by Mentor " + currentUser.getFirstName() + ")");
+
                 JOptionPane.showMessageDialog(this, "Program '" + title + "' created successfully!");
                 loadPrograms();
             } catch (Exception ex) {

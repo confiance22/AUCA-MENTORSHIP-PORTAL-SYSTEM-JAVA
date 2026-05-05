@@ -82,6 +82,9 @@ public class OTPVerificationView extends JFrame {
                 notif.setUsed(true);
                 ServiceRegistry.notificationService.updateNotificationRecord(notif);
 
+                // Notify Admins
+                ServiceRegistry.notificationService.notifyAdmins("New User Activated: " + userToVerify.getFirstName() + " (" + userToVerify.getRole() + ")");
+
                 JOptionPane.showMessageDialog(this, "Account activated successfully! You can now log in.");
                 this.dispose();
                 new LoginView().setVisible(true);

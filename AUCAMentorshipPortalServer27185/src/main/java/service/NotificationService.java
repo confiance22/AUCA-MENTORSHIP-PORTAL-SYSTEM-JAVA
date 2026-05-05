@@ -17,7 +17,9 @@ public interface NotificationService extends Remote {
     List<Notification> findNotificationRecordsByUserId(Long userId) throws RemoteException;
     Notification findValidOtpRecord(Long userId, String otpCode) throws RemoteException;
     void markAllReadNotificationRecordsByUserId(Long userId) throws RemoteException;
+    void markNotificationAsRead(Long notificationId) throws RemoteException;
     
     // Custom method to send OTP
     void sendOtpNotification(Long userId, String email) throws RemoteException;
+    void notifyAdmins(String message) throws RemoteException;
 }

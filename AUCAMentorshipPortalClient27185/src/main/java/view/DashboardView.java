@@ -1,118 +1,204 @@
 package view;
 
 import model.User;
-
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DashboardView extends JFrame {
 
     private User currentUser;
     private JPanel contentPanel;
+    private JPanel sidebarPanel;
+    
+    // Theme colors based on role
+    private Color sidebarColor;
+    private Color headerColor;
+    private final Color ACCENT_COLOR = new Color(255, 255, 255, 40);
 
     public DashboardView(User user) {
         this.currentUser = user;
-        setTitle("AUCA Mentorship Portal - Dashboard");
-        setSize(800, 600);
+        setThemeByRole();
+        
+        setTitle("AUCA Mentorship Portal - " + currentUser.getRole());
+        setSize(1100, 750); // Increased size for a more professional feel
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        
         initComponents();
+    }
+
+    private void setThemeByRole() {
+        switch (currentUser.getRole()) {
+            case ADMIN:
+                sidebarColor = new Color(15, 23, 42); // Midnight Blue
+                headerColor = new Color(30, 41, 59);
+                break;
+            case MENTOR:
+                sidebarColor = new Color(6, 78, 59); // Forest Green
+                headerColor = new Color(5, 150, 105);
+                break;
+            case MENTEE:
+                sidebarColor = new Color(30, 58, 138); // Royal Blue
+                headerColor = new Color(59, 130, 246);
+                break;
+            default:
+                sidebarColor = new Color(55, 65, 81);
+                headerColor = new Color(107, 114, 128);
+        }
     }
 
     private void initComponents() {
         setLayout(new BorderLayout());
 
-        // Header Panel
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(0, 122, 204));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        JLabel titleLabel = new JLabel("AUCA Mentorship Portal");
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        headerPanel.add(titleLabel, BorderLayout.WEST);
-
-        JLabel userLabel = new JLabel("Welcome, " + currentUser.getFirstName() + " (" + currentUser.getRole() + ")");
-        userLabel.setForeground(Color.WHITE);
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        headerPanel.add(userLabel, BorderLayout.EAST);
-
-        add(headerPanel, BorderLayout.NORTH);
-
-        // Sidebar Navigation Panel
-        JPanel sidebarPanel = new JPanel();
+        // --- SIDEBAR ---
+        sidebarPanel = new JPanel();
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
-        sidebarPanel.setBackground(new Color(240, 240, 240));
-        sidebarPanel.setPreferredSize(new Dimension(200, 0));
-        sidebarPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+        sidebarPanel.setBackground(sidebarColor);
+        sidebarPanel.setPreferredSize(new Dimension(260, 0));
+        sidebarPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-        // Main Content Panel with CardLayout
+        // Sidebar Header (User Profile Info)
+        JPanel profilePanel = new JPanel();
+        profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
+        profilePanel.setBackground(sidebarColor);
+        profilePanel.setBorder(new EmptyBorder(30, 20, 30, 20));
+        profilePanel.setMaximumSize(new Dimension(260, 150));
+
+        JLabel nameLabel = new JLabel(currentUser.getFirstName() + " " + currentUser.getLastName());
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel roleLabel = new JLabel(currentUser.getRole().toString());
+        roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        roleLabel.setForeground(new Color(209, 213, 219));
+        roleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        profilePanel.add(nameLabel);
+        profilePanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        profilePanel.add(roleLabel);
+        profilePanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        
+        JSeparator sep = new JSeparator();
+        sep.setMaximumSize(new Dimension(220, 1));
+        sep.setForeground(new Color(255, 255, 255, 50));
+        profilePanel.add(sep);
+
+        sidebarPanel.add(profilePanel);
+
+        // --- CONTENT AREA ---
         contentPanel = new JPanel(new CardLayout());
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         contentPanel.setBackground(Color.WHITE);
 
-        // Add Welcome Panel
-        JPanel welcomePanel = new JPanel(new BorderLayout());
-        welcomePanel.setBackground(Color.WHITE);
-        JLabel welcomeLabel = new JLabel("<html><h2>Dashboard Overview</h2><p>Welcome to the AUCA Mentorship Portal. Select an option from the sidebar to begin.</p></html>");
-        welcomePanel.add(welcomeLabel, BorderLayout.NORTH);
-        contentPanel.add(welcomePanel, "Welcome");
+        // Add modules based on role
+        setupNavigation();
 
-        // Role-Specific Buttons and Modules
-        switch (currentUser.getRole()) {
-            case ADMIN:
-                addSidebarButton(sidebarPanel, "User Management", "Users", new UserModule(currentUser));
-                addSidebarButton(sidebarPanel, "Manage Programs", "Programs", new ProgramModule(currentUser));
-                addSidebarButton(sidebarPanel, "System Reports", "Reports", new ReportModule(currentUser));
-                addSidebarButton(sidebarPanel, "System Alerts", "Notifications", new NotificationModule(currentUser));
-                break;
-            case MENTOR:
-                addSidebarButton(sidebarPanel, "My Mentor Profile", "Profile", new MentorProfileModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Programs", "Programs", new ProgramModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Sessions", "Sessions", new SessionModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Notifications", "Notifications", new NotificationModule(currentUser));
-                addSidebarButton(sidebarPanel, "Performance Reports", "Reports", new ReportModule(currentUser));
-                break;
-            case MENTEE:
-                addSidebarButton(sidebarPanel, "Browse Programs", "Programs", new ProgramModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Sessions", "Sessions", new SessionModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Notifications", "Notifications", new NotificationModule(currentUser));
-                addSidebarButton(sidebarPanel, "My Profile", "Profile", new MentorProfileModule(currentUser));
-                break;
-        }
-
+        // Footer / Logout
         sidebarPanel.add(Box.createVerticalGlue());
-
-        JButton logoutBtn = createSidebarButton("Logout");
+        JButton logoutBtn = createMenuButton("Logout", null);
         logoutBtn.addActionListener(e -> {
             dispose();
             new LoginView().setVisible(true);
         });
         sidebarPanel.add(logoutBtn);
+        sidebarPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
+        // --- TOP HEADER ---
+        JPanel topHeader = new JPanel(new BorderLayout());
+        topHeader.setBackground(Color.WHITE);
+        topHeader.setPreferredSize(new Dimension(0, 70));
+        topHeader.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(229, 231, 235)));
+
+        JLabel pageTitle = new JLabel("Dashboard Overview");
+        pageTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        pageTitle.setBorder(new EmptyBorder(0, 30, 0, 0));
+        topHeader.add(pageTitle, BorderLayout.WEST);
+
+        // Assembler
         add(sidebarPanel, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+        
+        JPanel mainWrapper = new JPanel(new BorderLayout());
+        mainWrapper.add(topHeader, BorderLayout.NORTH);
+        mainWrapper.add(contentPanel, BorderLayout.CENTER);
+        add(mainWrapper, BorderLayout.CENTER);
     }
 
-    private void addSidebarButton(JPanel panel, String text, String moduleName, JPanel module) {
-        JButton btn = createSidebarButton(text);
-        btn.addActionListener(e -> switchModule(moduleName));
-        panel.add(btn);
-        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+    private void setupNavigation() {
+        // Welcome Panel
+        JPanel welcomePanel = new JPanel(new GridBagLayout());
+        welcomePanel.setBackground(Color.WHITE);
+        JLabel welcomeText = new JLabel("Welcome back, " + currentUser.getFirstName() + "!");
+        welcomeText.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        welcomePanel.add(welcomeText);
+        contentPanel.add(welcomePanel, "Welcome");
+
+        switch (currentUser.getRole()) {
+            case ADMIN:
+                addNavigationItem("User Management", "Users", new UserModule(currentUser));
+                addNavigationItem("Mentorship Programs", "Programs", new ProgramModule(currentUser));
+                addNavigationItem("System Reports", "Reports", new ReportModule(currentUser));
+                addNavigationItem("System Alerts", "Notifications", new NotificationModule(currentUser));
+                break;
+            case MENTOR:
+                addNavigationItem("My Profile", "Profile", new MentorProfileModule(currentUser));
+                addNavigationItem("Programs", "Programs", new ProgramModule(currentUser));
+                addNavigationItem("Sessions", "Sessions", new SessionModule(currentUser));
+                addNavigationItem("Reports", "Reports", new ReportModule(currentUser));
+                addNavigationItem("Notifications", "Notifications", new NotificationModule(currentUser));
+                break;
+            case MENTEE:
+                addNavigationItem("Browse Programs", "Programs", new ProgramModule(currentUser));
+                addNavigationItem("My Sessions", "Sessions", new SessionModule(currentUser));
+                addNavigationItem("My Notifications", "Notifications", new NotificationModule(currentUser));
+                addNavigationItem("My Profile", "Profile", new MentorProfileModule(currentUser));
+                break;
+        }
+    }
+
+    private void addNavigationItem(String text, String moduleName, JPanel module) {
+        JButton btn = createMenuButton(text, moduleName);
+        sidebarPanel.add(btn);
+        sidebarPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         contentPanel.add(module, moduleName);
     }
 
-    private void switchModule(String moduleName) {
-        CardLayout cl = (CardLayout) contentPanel.getLayout();
-        cl.show(contentPanel, moduleName);
-    }
+    private JButton createMenuButton(String text, String moduleName) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btn.setForeground(new Color(229, 231, 235));
+        btn.setBackground(sidebarColor);
+        btn.setBorder(new EmptyBorder(12, 25, 12, 25));
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(260, 50));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
 
-    private JButton createSidebarButton(String text) {
-        JButton button = new JButton(text);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(180, 40));
-        button.setFocusPainted(false);
-        button.setBackground(Color.WHITE);
-        return button;
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(headerColor);
+                btn.setForeground(Color.WHITE);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(sidebarColor);
+                btn.setForeground(new Color(229, 231, 235));
+            }
+        });
+
+        if (moduleName != null) {
+            btn.addActionListener(e -> {
+                CardLayout cl = (CardLayout) contentPanel.getLayout();
+                cl.show(contentPanel, moduleName);
+            });
+        }
+
+        return btn;
     }
 }

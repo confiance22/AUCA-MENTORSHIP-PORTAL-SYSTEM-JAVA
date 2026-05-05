@@ -6,6 +6,7 @@ import util.ServiceRegistry;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import util.TableStyleUtil;
 import java.util.List;
 
 public class UserModule extends JPanel {
@@ -19,14 +20,18 @@ public class UserModule extends JPanel {
         setBackground(Color.WHITE);
         
         JLabel titleLabel = new JLabel("User Management", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         // Table setup
         String[] columnNames = {"ID", "First Name", "Last Name", "Email", "Role", "Active"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
         userTable = new JTable(tableModel);
+        TableStyleUtil.applyCustomStyle(userTable);
         add(new JScrollPane(userTable), BorderLayout.CENTER);
 
         // Buttons

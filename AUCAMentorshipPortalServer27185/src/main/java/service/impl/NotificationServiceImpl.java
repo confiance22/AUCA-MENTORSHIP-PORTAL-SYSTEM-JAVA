@@ -75,6 +75,15 @@ public class NotificationServiceImpl extends UnicastRemoteObject implements Noti
     }
 
     @Override
+    public void markNotificationAsRead(Long notificationId) throws RemoteException {
+        Notification n = notificationDao.findById(notificationId);
+        if (n != null) {
+            n.setRead(true);
+            notificationDao.update(n);
+        }
+    }
+
+    @Override
     public void sendOtpNotification(Long userId, String email) throws RemoteException {
         try {
             User user = userDao.findById(userId);
@@ -104,6 +113,26 @@ public class NotificationServiceImpl extends UnicastRemoteObject implements Noti
         } catch (Exception e) {
             e.printStackTrace();
             throw new RemoteException("Error sending OTP: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void notifyAdmins(String message) throws RemoteException {
+        try {
+            List<User> admins = userDao.findByRole(model.UserRole.ADMIN);
+            if (admins != null) {
+                for (User admin : admins) {
+                    Notification notif = new Notification();
+                    notif.setUser(admin);
+                    notif.setMessage(message);
+                    notif.setType(NotificationType.GENERAL);
+                    notif.setCreatedAt(LocalDateTime.now());
+                    notif.setRead(false);
+                    notificationDao.save(notif);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to notify admins: " + e.getMessage());
         }
     }
 

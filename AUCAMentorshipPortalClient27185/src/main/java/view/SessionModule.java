@@ -8,9 +8,11 @@ import model.NotificationType;
 import model.User;
 import model.UserRole;
 import util.ServiceRegistry;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import util.TableStyleUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,14 +27,18 @@ public class SessionModule extends JPanel {
         setBackground(Color.WHITE);
         
         JLabel titleLabel = new JLabel("Mentorship Sessions", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         // Table setup
         String[] columnNames = {"ID", "Mentor", "Mentee", "Time", "Status"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
         sessionTable = new JTable(tableModel);
+        TableStyleUtil.applyCustomStyle(sessionTable);
         add(new JScrollPane(sessionTable), BorderLayout.CENTER);
 
         // Buttons
@@ -46,8 +52,13 @@ public class SessionModule extends JPanel {
 
         if (currentUser.getRole() == UserRole.MENTOR) {
             JButton completeBtn = new JButton("Mark Completed");
+            JButton cancelBtn = new JButton("Cancel Session");
+            
             completeBtn.addActionListener(e -> completeSession());
+            cancelBtn.addActionListener(e -> cancelSession());
+            
             buttonPanel.add(completeBtn);
+            buttonPanel.add(cancelBtn);
         } else if (currentUser.getRole() == UserRole.MENTEE) {
             JButton feedbackBtn = new JButton("Leave Feedback");
             feedbackBtn.addActionListener(e -> leaveFeedback());
@@ -59,6 +70,34 @@ public class SessionModule extends JPanel {
         loadSessions();
     }
 
+    private void loadSessions() {
+        try {
+            List<MentorshipSession> sessions;
+            if (currentUser.getRole() == UserRole.MENTOR) {
+                sessions = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordsByMentorId(currentUser.getId());
+            } else if (currentUser.getRole() == UserRole.MENTEE) {
+                sessions = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordsByMenteeId(currentUser.getId());
+            } else {
+                sessions = ServiceRegistry.mentorshipSessionService.findAllMentorshipSessionRecords();
+            }
+            
+            tableModel.setRowCount(0);
+            if (sessions != null) {
+                for (MentorshipSession s : sessions) {
+                    tableModel.addRow(new Object[]{
+                        s.getId(), 
+                        s.getMentor() != null ? s.getMentor().getFirstName() : "N/A",
+                        s.getMentee() != null ? s.getMentee().getFirstName() : "N/A",
+                        s.getScheduledAt(), 
+                        s.getStatus()
+                    });
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error loading sessions: " + ex.getMessage());
+        }
+    }
+
     private void leaveFeedback() {
         int selectedRow = sessionTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -66,7 +105,7 @@ public class SessionModule extends JPanel {
             return;
         }
 
-        String status = (String) tableModel.getValueAt(selectedRow, 4).toString();
+        String status = tableModel.getValueAt(selectedRow, 4).toString();
         if (!status.equals("COMPLETED")) {
             JOptionPane.showMessageDialog(this, "You can only leave feedback for COMPLETED sessions.");
             return;
@@ -79,14 +118,12 @@ public class SessionModule extends JPanel {
             MentorshipSession session = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordById(searchS);
             
             if (session != null) {
-                // Check if feedback already exists
                 MentorshipFeedback existing = ServiceRegistry.mentorshipFeedbackService.findFeedbackRecordBySessionId(id);
                 if (existing != null) {
                     JOptionPane.showMessageDialog(this, "You have already left feedback for this session.");
                     return;
                 }
 
-                // Simple Input Dialogs for Feedback
                 String ratingStr = JOptionPane.showInputDialog(this, "Enter Rating (1-5):");
                 if (ratingStr == null) return;
                 int rating = Integer.parseInt(ratingStr);
@@ -125,7 +162,6 @@ public class SessionModule extends JPanel {
                 session.setStatus(SessionStatus.COMPLETED);
                 ServiceRegistry.mentorshipSessionService.updateMentorshipSessionRecord(session);
                 
-                // Notify Mentee
                 Notification notif = new Notification();
                 notif.setUser(session.getMentee());
                 notif.setMessage("Your session with " + currentUser.getFirstName() + " has been marked as COMPLETED.");
@@ -141,31 +177,40 @@ public class SessionModule extends JPanel {
         }
     }
 
-    private void loadSessions() {
+    private void cancelSession() {
+        int selectedRow = sessionTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a session.");
+            return;
+        }
+
+        Long id = (Long) tableModel.getValueAt(selectedRow, 0);
         try {
-            List<MentorshipSession> sessions;
-            if (currentUser.getRole() == UserRole.MENTOR) {
-                sessions = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordsByMentorId(currentUser.getId());
-            } else if (currentUser.getRole() == UserRole.MENTEE) {
-                sessions = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordsByMenteeId(currentUser.getId());
-            } else {
-                sessions = ServiceRegistry.mentorshipSessionService.findAllMentorshipSessionRecords();
-            }
+            MentorshipSession searchS = new MentorshipSession();
+            searchS.setId(id);
+            MentorshipSession session = ServiceRegistry.mentorshipSessionService.findMentorshipSessionRecordById(searchS);
             
-            tableModel.setRowCount(0);
-            if (sessions != null) {
-                for (MentorshipSession s : sessions) {
-                    tableModel.addRow(new Object[]{
-                        s.getId(), 
-                        s.getMentor() != null ? s.getMentor().getFirstName() : "N/A",
-                        s.getMentee() != null ? s.getMentee().getFirstName() : "N/A",
-                        s.getScheduledAt(), 
-                        s.getStatus()
-                    });
+            if (session != null) {
+                if (session.getStatus() != SessionStatus.SCHEDULED) {
+                    JOptionPane.showMessageDialog(this, "Only SCHEDULED sessions can be cancelled.");
+                    return;
                 }
+
+                session.setStatus(SessionStatus.CANCELLED);
+                ServiceRegistry.mentorshipSessionService.updateMentorshipSessionRecord(session);
+                
+                Notification notif = new Notification();
+                notif.setUser(session.getMentee());
+                notif.setMessage("Your session with " + currentUser.getFirstName() + " has been CANCELLED by the mentor.");
+                notif.setType(NotificationType.GENERAL);
+                notif.setCreatedAt(LocalDateTime.now());
+                ServiceRegistry.notificationService.registerNotificationRecord(notif);
+                
+                JOptionPane.showMessageDialog(this, "Session CANCELLED! Mentee notified.");
+                loadSessions();
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading sessions: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error cancelling session: " + ex.getMessage());
         }
     }
 }
