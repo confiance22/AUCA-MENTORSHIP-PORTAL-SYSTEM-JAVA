@@ -4,6 +4,8 @@ import dao.MentorshipSessionDao;
 import dao.impl.MentorshipSessionDaoImpl;
 import model.MentorshipSession;
 import model.SessionStatus;
+import model.User;
+import model.MentorshipProgram;
 import service.MentorshipSessionService;
 
 import java.rmi.RemoteException;
@@ -22,48 +24,102 @@ public class MentorshipSessionServiceImpl extends UnicastRemoteObject implements
     @Override
     public MentorshipSession registerMentorshipSessionRecord(MentorshipSession theMentorshipSession) throws RemoteException {
         mentorshipSessionDao.save(theMentorshipSession);
-        return theMentorshipSession;
+        return cleanSession(theMentorshipSession);
     }
 
     @Override
     public MentorshipSession updateMentorshipSessionRecord(MentorshipSession theMentorshipSession) throws RemoteException {
         mentorshipSessionDao.update(theMentorshipSession);
-        return theMentorshipSession;
+        return cleanSession(theMentorshipSession);
     }
 
     @Override
     public MentorshipSession deleteMentorshipSessionRecord(MentorshipSession theMentorshipSession) throws RemoteException {
         mentorshipSessionDao.delete(theMentorshipSession.getId());
-        return theMentorshipSession;
+        return cleanSession(theMentorshipSession);
     }
 
     @Override
     public MentorshipSession findMentorshipSessionRecordById(MentorshipSession theMentorshipSession) throws RemoteException {
-        return mentorshipSessionDao.findById(theMentorshipSession.getId());
+        return cleanSession(mentorshipSessionDao.findById(theMentorshipSession.getId()));
     }
 
     @Override
     public List<MentorshipSession> findAllMentorshipSessionRecords() throws RemoteException {
-        return mentorshipSessionDao.findAll();
+        List<MentorshipSession> sessions = mentorshipSessionDao.findAll();
+        if (sessions != null) {
+            sessions.forEach(this::cleanSession);
+        }
+        return sessions;
     }
 
     @Override
     public List<MentorshipSession> findMentorshipSessionRecordsByMentorId(Long mentorId) throws RemoteException {
-        return mentorshipSessionDao.findByMentorId(mentorId);
+        List<MentorshipSession> sessions = mentorshipSessionDao.findByMentorId(mentorId);
+        if (sessions != null) {
+            sessions.forEach(this::cleanSession);
+        }
+        return sessions;
     }
 
     @Override
     public List<MentorshipSession> findMentorshipSessionRecordsByMenteeId(Long menteeId) throws RemoteException {
-        return mentorshipSessionDao.findByMenteeId(menteeId);
+        List<MentorshipSession> sessions = mentorshipSessionDao.findByMenteeId(menteeId);
+        if (sessions != null) {
+            sessions.forEach(this::cleanSession);
+        }
+        return sessions;
     }
 
     @Override
     public List<MentorshipSession> findMentorshipSessionRecordsByStatus(SessionStatus status) throws RemoteException {
-        return mentorshipSessionDao.findByStatus(status);
+        List<MentorshipSession> sessions = mentorshipSessionDao.findByStatus(status);
+        if (sessions != null) {
+            sessions.forEach(this::cleanSession);
+        }
+        return sessions;
     }
 
     @Override
     public List<MentorshipSession> findUpcomingMentorshipSessionRecordsByUserId(Long userId) throws RemoteException {
-        return mentorshipSessionDao.findUpcomingByUserId(userId);
+        List<MentorshipSession> sessions = mentorshipSessionDao.findUpcomingByUserId(userId);
+        if (sessions != null) {
+            sessions.forEach(this::cleanSession);
+        }
+        return sessions;
+    }
+
+    private MentorshipSession cleanSession(MentorshipSession session) {
+        if (session == null) return null;
+        if (session.getMentor() != null) {
+            session.setMentor(cleanUser(session.getMentor()));
+        }
+        if (session.getMentee() != null) {
+            session.setMentee(cleanUser(session.getMentee()));
+        }
+        if (session.getProgram() != null) {
+            MentorshipProgram program = session.getProgram();
+            // Convert PersistentBag to a clean ArrayList if it exists
+            if (program.getEnrolledUsers() != null) {
+                java.util.List<User> cleanList = new java.util.ArrayList<>();
+                for (User u : program.getEnrolledUsers()) {
+                    cleanList.add(cleanUser(u));
+                }
+                program.setEnrolledUsers(cleanList);
+            }
+            if (program.getCreatedBy() != null) {
+                program.setCreatedBy(cleanUser(program.getCreatedBy()));
+            }
+        }
+        return session;
+    }
+
+    private User cleanUser(User user) {
+        if (user == null) return null;
+        user.setSessionsAsMentor(null);
+        user.setSessionsAsMentee(null);
+        user.setNotifications(null);
+        user.setMentorProfile(null);
+        return user;
     }
 }

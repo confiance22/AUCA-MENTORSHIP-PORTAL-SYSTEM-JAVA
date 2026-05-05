@@ -14,6 +14,7 @@ import service.impl.NotificationServiceImpl;
 import service.impl.ReportServiceImpl;
 import service.impl.UserServiceImpl;
 
+import util.DataSeeder;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import org.apache.activemq.broker.BrokerService;
@@ -34,6 +35,9 @@ public class MentorshipServer {
             // Start RMI Registry on port 1099
             LocateRegistry.createRegistry(1099);
             System.out.println("RMI Registry started on port 1099.");
+
+            // Seed default admin account (creates or repairs broken hash)
+            DataSeeder.seed();
 
             // Instantiate services
             UserService userService = new UserServiceImpl();

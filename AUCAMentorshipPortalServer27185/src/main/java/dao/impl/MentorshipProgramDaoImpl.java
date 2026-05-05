@@ -55,7 +55,11 @@ public class MentorshipProgramDaoImpl implements MentorshipProgramDao {
     @Override
     public MentorshipProgram findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(MentorshipProgram.class, id);
+            return session.createQuery(
+                "SELECT p FROM MentorshipProgram p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy WHERE p.id = :id",
+                MentorshipProgram.class)
+                .setParameter("id", id)
+                .uniqueResult();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -65,7 +69,7 @@ public class MentorshipProgramDaoImpl implements MentorshipProgramDao {
     @Override
     public List<MentorshipProgram> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM MentorshipProgram", MentorshipProgram.class).list();
+            return session.createQuery("SELECT DISTINCT p FROM MentorshipProgram p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy", MentorshipProgram.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -89,7 +93,7 @@ public class MentorshipProgramDaoImpl implements MentorshipProgramDao {
     public List<MentorshipProgram> findByUserId(Long userId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                "SELECT p FROM MentorshipProgram p JOIN p.enrolledUsers u WHERE u.id = :userId",
+                "SELECT DISTINCT p FROM MentorshipProgram p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy WHERE p.createdBy.id = :userId OR EXISTS (SELECT 1 FROM p.enrolledUsers u WHERE u.id = :userId)",
                 MentorshipProgram.class)
                 .setParameter("userId", userId)
                 .list();

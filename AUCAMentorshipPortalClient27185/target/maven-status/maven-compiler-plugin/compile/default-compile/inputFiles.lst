@@ -1,6 +1,8 @@
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\controller\MentorProfileController.java
+D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\controller\RegisterController.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\view\UserModule.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\service\UserService.java
+D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\view\RegisterView.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\MentorshipPortalClient.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\model\User.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\service\MentorshipSessionService.java
@@ -10,6 +12,7 @@ D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipP
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\util\UITheme.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\controller\ProgramController.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\model\MentorProfile.java
+D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\view\NotificationModule.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\util\TableUtil.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\controller\UserController.java
 D:\CONFY\SKL\JAVA PROGRAMMING\AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA\AUCAMentorshipPortalClient27185\src\main\java\util\ServiceRegistry.java

@@ -56,7 +56,11 @@ public class MentorshipSessionDaoImpl implements MentorshipSessionDao {
     @Override
     public MentorshipSession findById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(MentorshipSession.class, id);
+            return session.createQuery(
+                "SELECT s FROM MentorshipSession s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee LEFT JOIN FETCH s.program p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy WHERE s.id = :id",
+                MentorshipSession.class)
+                .setParameter("id", id)
+                .uniqueResult();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -66,7 +70,7 @@ public class MentorshipSessionDaoImpl implements MentorshipSessionDao {
     @Override
     public List<MentorshipSession> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("FROM MentorshipSession", MentorshipSession.class).list();
+            return session.createQuery("SELECT DISTINCT s FROM MentorshipSession s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee LEFT JOIN FETCH s.program p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy", MentorshipSession.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -77,7 +81,7 @@ public class MentorshipSessionDaoImpl implements MentorshipSessionDao {
     public List<MentorshipSession> findByMentorId(Long mentorId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                "FROM MentorshipSession WHERE mentor.id = :mentorId", MentorshipSession.class)
+                "SELECT DISTINCT s FROM MentorshipSession s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee LEFT JOIN FETCH s.program p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy WHERE s.mentor.id = :mentorId", MentorshipSession.class)
                 .setParameter("mentorId", mentorId)
                 .list();
         } catch (Exception e) {
@@ -90,7 +94,7 @@ public class MentorshipSessionDaoImpl implements MentorshipSessionDao {
     public List<MentorshipSession> findByMenteeId(Long menteeId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery(
-                "FROM MentorshipSession WHERE mentee.id = :menteeId", MentorshipSession.class)
+                "SELECT DISTINCT s FROM MentorshipSession s LEFT JOIN FETCH s.mentor LEFT JOIN FETCH s.mentee LEFT JOIN FETCH s.program p LEFT JOIN FETCH p.enrolledUsers LEFT JOIN FETCH p.createdBy WHERE s.mentee.id = :menteeId", MentorshipSession.class)
                 .setParameter("menteeId", menteeId)
                 .list();
         } catch (Exception e) {

@@ -42,50 +42,64 @@ public class DashboardView extends JFrame {
         // Sidebar Navigation Panel
         JPanel sidebarPanel = new JPanel();
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
-        sidebarPanel.setBackground(Color.LIGHT_GRAY);
+        sidebarPanel.setBackground(new Color(240, 240, 240));
         sidebarPanel.setPreferredSize(new Dimension(200, 0));
         sidebarPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
-
-        JButton profileBtn = createSidebarButton("My Profile");
-        JButton programsBtn = createSidebarButton("Mentorship Programs");
-        JButton sessionsBtn = createSidebarButton("My Sessions");
-        JButton logoutBtn = createSidebarButton("Logout");
-
-        profileBtn.addActionListener(e -> switchModule("Profile"));
-        programsBtn.addActionListener(e -> switchModule("Programs"));
-        sessionsBtn.addActionListener(e -> switchModule("Sessions"));
-
-        logoutBtn.addActionListener(e -> {
-            dispose();
-            new LoginView().setVisible(true);
-        });
-
-        sidebarPanel.add(profileBtn);
-        sidebarPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        sidebarPanel.add(programsBtn);
-        sidebarPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        sidebarPanel.add(sessionsBtn);
-        sidebarPanel.add(Box.createVerticalGlue());
-        sidebarPanel.add(logoutBtn);
-
-        add(sidebarPanel, BorderLayout.WEST);
 
         // Main Content Panel with CardLayout
         contentPanel = new JPanel(new CardLayout());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         contentPanel.setBackground(Color.WHITE);
 
+        // Add Welcome Panel
         JPanel welcomePanel = new JPanel(new BorderLayout());
         welcomePanel.setBackground(Color.WHITE);
-        JLabel welcomeLabel = new JLabel("<html><h2>Dashboard Overview</h2><p>Select an option from the sidebar to begin.</p></html>");
+        JLabel welcomeLabel = new JLabel("<html><h2>Dashboard Overview</h2><p>Welcome to the AUCA Mentorship Portal. Select an option from the sidebar to begin.</p></html>");
         welcomePanel.add(welcomeLabel, BorderLayout.NORTH);
-        
         contentPanel.add(welcomePanel, "Welcome");
-        contentPanel.add(new MentorProfileModule(), "Profile");
-        contentPanel.add(new ProgramModule(), "Programs");
-        contentPanel.add(new SessionModule(), "Sessions");
 
+        // Role-Specific Buttons and Modules
+        switch (currentUser.getRole()) {
+            case ADMIN:
+                addSidebarButton(sidebarPanel, "User Management", "Users", new UserModule(currentUser));
+                addSidebarButton(sidebarPanel, "Manage Programs", "Programs", new ProgramModule(currentUser));
+                addSidebarButton(sidebarPanel, "System Reports", "Reports", new ReportModule(currentUser));
+                addSidebarButton(sidebarPanel, "System Alerts", "Notifications", new NotificationModule(currentUser));
+                break;
+            case MENTOR:
+                addSidebarButton(sidebarPanel, "My Mentor Profile", "Profile", new MentorProfileModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Programs", "Programs", new ProgramModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Sessions", "Sessions", new SessionModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Notifications", "Notifications", new NotificationModule(currentUser));
+                addSidebarButton(sidebarPanel, "Performance Reports", "Reports", new ReportModule(currentUser));
+                break;
+            case MENTEE:
+                addSidebarButton(sidebarPanel, "Browse Programs", "Programs", new ProgramModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Sessions", "Sessions", new SessionModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Notifications", "Notifications", new NotificationModule(currentUser));
+                addSidebarButton(sidebarPanel, "My Profile", "Profile", new MentorProfileModule(currentUser));
+                break;
+        }
+
+        sidebarPanel.add(Box.createVerticalGlue());
+
+        JButton logoutBtn = createSidebarButton("Logout");
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new LoginView().setVisible(true);
+        });
+        sidebarPanel.add(logoutBtn);
+
+        add(sidebarPanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private void addSidebarButton(JPanel panel, String text, String moduleName, JPanel module) {
+        JButton btn = createSidebarButton(text);
+        btn.addActionListener(e -> switchModule(moduleName));
+        panel.add(btn);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        contentPanel.add(module, moduleName);
     }
 
     private void switchModule(String moduleName) {

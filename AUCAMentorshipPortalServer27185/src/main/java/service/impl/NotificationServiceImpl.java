@@ -30,39 +30,43 @@ public class NotificationServiceImpl extends UnicastRemoteObject implements Noti
     @Override
     public Notification registerNotificationRecord(Notification theNotification) throws RemoteException {
         notificationDao.save(theNotification);
-        return theNotification;
+        return cleanNotification(theNotification);
     }
 
     @Override
     public Notification updateNotificationRecord(Notification theNotification) throws RemoteException {
         notificationDao.update(theNotification);
-        return theNotification;
+        return cleanNotification(theNotification);
     }
 
     @Override
     public Notification deleteNotificationRecord(Notification theNotification) throws RemoteException {
         notificationDao.delete(theNotification.getId());
-        return theNotification;
+        return cleanNotification(theNotification);
     }
 
     @Override
     public Notification findNotificationRecordById(Notification theNotification) throws RemoteException {
-        return notificationDao.findById(theNotification.getId());
+        return cleanNotification(notificationDao.findById(theNotification.getId()));
     }
 
     @Override
     public List<Notification> findAllNotificationRecords() throws RemoteException {
-        return notificationDao.findAll();
+        List<Notification> notifs = notificationDao.findAll();
+        if (notifs != null) notifs.forEach(this::cleanNotification);
+        return notifs;
     }
 
     @Override
     public List<Notification> findNotificationRecordsByUserId(Long userId) throws RemoteException {
-        return notificationDao.findByUserId(userId);
+        List<Notification> notifs = notificationDao.findByUserId(userId);
+        if (notifs != null) notifs.forEach(this::cleanNotification);
+        return notifs;
     }
 
     @Override
     public Notification findValidOtpRecord(Long userId, String otpCode) throws RemoteException {
-        return notificationDao.findValidOtp(userId, otpCode);
+        return cleanNotification(notificationDao.findValidOtp(userId, otpCode));
     }
 
     @Override
@@ -91,5 +95,17 @@ public class NotificationServiceImpl extends UnicastRemoteObject implements Noti
         // Send via ActiveMQ
         String message = "OTP|" + email + "|" + otp;
         ActiveMQProducer.sendNotification(message);
+    }
+
+    private Notification cleanNotification(Notification notification) {
+        if (notification == null) return null;
+        if (notification.getUser() != null) {
+            User user = notification.getUser();
+            user.setSessionsAsMentor(null);
+            user.setSessionsAsMentee(null);
+            user.setNotifications(null);
+            user.setMentorProfile(null);
+        }
+        return notification;
     }
 }

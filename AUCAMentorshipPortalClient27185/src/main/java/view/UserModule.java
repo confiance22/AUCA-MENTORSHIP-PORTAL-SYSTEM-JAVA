@@ -1,11 +1,20 @@
 package view;
 
+import model.User;
+import model.UserRole;
+import util.ServiceRegistry;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class UserModule extends JPanel {
+    private User currentUser;
+    private JTable userTable;
+    private DefaultTableModel tableModel;
 
-    public UserModule() {
+    public UserModule(User user) {
+        this.currentUser = user;
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
@@ -14,9 +23,69 @@ public class UserModule extends JPanel {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.add(new JLabel("User management content will be implemented here."));
-        contentPanel.setBackground(Color.WHITE);
-        add(contentPanel, BorderLayout.CENTER);
+        // Table setup
+        String[] columnNames = {"ID", "First Name", "Last Name", "Email", "Role", "Active"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        userTable = new JTable(tableModel);
+        add(new JScrollPane(userTable), BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton refreshBtn = new JButton("Refresh List");
+        JButton deleteBtn = new JButton("Delete User");
+        
+        refreshBtn.addActionListener(e -> loadUsers());
+        deleteBtn.addActionListener(e -> deleteSelectedUser());
+        
+        buttonPanel.add(refreshBtn);
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            buttonPanel.add(deleteBtn);
+        }
+        
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Initial load
+        loadUsers();
+    }
+
+    private void loadUsers() {
+        try {
+            List<User> users = ServiceRegistry.userService.findAllUserRecords();
+            tableModel.setRowCount(0);
+            if (users != null) {
+                for (User u : users) {
+                    tableModel.addRow(new Object[]{
+                        u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getRole(), u.isIsActive()
+                    });
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error loading users: " + ex.getMessage());
+        }
+    }
+
+    private void deleteSelectedUser() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a user to delete.");
+            return;
+        }
+
+        Long id = (Long) tableModel.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete user ID " + id + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                User userToDelete = new User();
+                userToDelete.setId(id);
+                ServiceRegistry.userService.deleteUserRecord(userToDelete);
+                JOptionPane.showMessageDialog(this, "User deleted successfully.");
+                loadUsers();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error deleting user: " + ex.getMessage());
+            }
+        }
     }
 }
