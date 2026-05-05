@@ -3,10 +3,11 @@ package view;
 import model.User;
 import model.UserRole;
 import util.ServiceRegistry;
+import util.TableStyleUtil;
+import util.ButtonStyleUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import util.TableStyleUtil;
 import java.util.List;
 
 public class UserModule extends JPanel {
@@ -37,21 +38,23 @@ public class UserModule extends JPanel {
         // Buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton refreshBtn = new JButton("Refresh List");
-        JButton deleteBtn = new JButton("Delete User");
-        
+        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
         refreshBtn.addActionListener(e -> loadUsers());
-        deleteBtn.addActionListener(e -> deleteSelectedUser());
-        
         buttonPanel.add(refreshBtn);
+
         if (currentUser.getRole() == UserRole.ADMIN) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton deleteBtn = new JButton("Delete User");
+            ButtonStyleUtil.applyDangerStyle(deleteBtn);
+            deleteBtn.addActionListener(e -> deleteSelectedUser());
             buttonPanel.add(deleteBtn);
         }
         
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Initial load
         loadUsers();
     }
 

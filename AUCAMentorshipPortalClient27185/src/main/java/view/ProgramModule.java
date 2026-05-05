@@ -9,10 +9,11 @@ import model.User;
 import model.UserRole;
 import model.ProgramStatus;
 import util.ServiceRegistry;
+import util.TableStyleUtil;
+import util.ButtonStyleUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import util.TableStyleUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,25 +52,35 @@ public class ProgramModule extends JPanel {
         // Buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton refreshBtn = new JButton("Refresh");
-        buttonPanel.add(refreshBtn);
-        
+        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
         refreshBtn.addActionListener(e -> loadPrograms());
+        buttonPanel.add(refreshBtn);
 
         if (currentUser.getRole() == UserRole.MENTOR) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
             JButton createBtn = new JButton("Create New Program");
+            ButtonStyleUtil.applySuccessStyle(createBtn);
             createBtn.addActionListener(e -> createProgram());
             buttonPanel.add(createBtn);
         } else if (currentUser.getRole() == UserRole.MENTEE) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
             JButton enrollBtn = new JButton("Enroll in Program");
-            JButton bookBtn = new JButton("Book Session");
+            ButtonStyleUtil.applySuccessStyle(enrollBtn);
             enrollBtn.addActionListener(e -> enrollInProgram());
-            bookBtn.addActionListener(e -> bookSession());
             buttonPanel.add(enrollBtn);
+            
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton bookBtn = new JButton("Book Session");
+            ButtonStyleUtil.applyPrimaryStyle(bookBtn);
+            bookBtn.addActionListener(e -> bookSession());
             buttonPanel.add(bookBtn);
         } else if (currentUser.getRole() == UserRole.ADMIN) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
             JButton deleteBtn = new JButton("Delete Selected");
+            ButtonStyleUtil.applyDangerStyle(deleteBtn);
             deleteBtn.addActionListener(e -> deleteProgram());
             buttonPanel.add(deleteBtn);
         }
@@ -162,13 +173,11 @@ public class ProgramModule extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this, "Do you want to enroll in '" + programTitle + "'?", "Enrollment", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                // Fetch the program object
                 MentorshipProgram searchP = new MentorshipProgram();
                 searchP.setId(programId);
                 MentorshipProgram program = ServiceRegistry.mentorshipProgramService.findMentorshipProgramRecordById(searchP);
                 
                 if (program != null) {
-                    // Check if already enrolled
                     boolean alreadyEnrolled = false;
                     if (program.getEnrolledUsers() != null) {
                         for (User u : program.getEnrolledUsers()) {
@@ -187,7 +196,6 @@ public class ProgramModule extends JPanel {
                         program.getEnrolledUsers().add(currentUser);
                         ServiceRegistry.mentorshipProgramService.updateMentorshipProgramRecord(program);
                         
-                        // Create Notification for Mentor
                         Notification notif = new Notification();
                         notif.setUser(program.getCreatedBy());
                         notif.setMessage("Mentee " + currentUser.getFirstName() + " has enrolled in your program: " + program.getTitle());
@@ -220,7 +228,6 @@ public class ProgramModule extends JPanel {
             MentorshipProgram program = ServiceRegistry.mentorshipProgramService.findMentorshipProgramRecordById(searchP);
 
             if (program != null) {
-                // Check enrollment
                 boolean isEnrolled = false;
                 if (program.getEnrolledUsers() != null) {
                     for (User u : program.getEnrolledUsers()) {
@@ -236,7 +243,6 @@ public class ProgramModule extends JPanel {
                     return;
                 }
 
-                // Create Session
                 MentorshipSession session = new MentorshipSession();
                 session.setMentor(program.getCreatedBy());
                 session.setMentee(currentUser);
@@ -248,7 +254,6 @@ public class ProgramModule extends JPanel {
 
                 ServiceRegistry.mentorshipSessionService.registerMentorshipSessionRecord(session);
 
-                // Create Notification for Mentor
                 Notification notif = new Notification();
                 notif.setUser(program.getCreatedBy());
                 notif.setMessage("Mentee " + currentUser.getFirstName() + " has booked a session for your program: " + program.getTitle());

@@ -8,11 +8,11 @@ import model.NotificationType;
 import model.User;
 import model.UserRole;
 import util.ServiceRegistry;
-
+import util.TableStyleUtil;
+import util.ButtonStyleUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import util.TableStyleUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,23 +44,29 @@ public class SessionModule extends JPanel {
         // Buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton refreshBtn = new JButton("Refresh");
-        buttonPanel.add(refreshBtn);
-        
+        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
         refreshBtn.addActionListener(e -> loadSessions());
+        buttonPanel.add(refreshBtn);
 
         if (currentUser.getRole() == UserRole.MENTOR) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
             JButton completeBtn = new JButton("Mark Completed");
-            JButton cancelBtn = new JButton("Cancel Session");
-            
+            ButtonStyleUtil.applySuccessStyle(completeBtn);
             completeBtn.addActionListener(e -> completeSession());
-            cancelBtn.addActionListener(e -> cancelSession());
-            
             buttonPanel.add(completeBtn);
+
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton cancelBtn = new JButton("Cancel Session");
+            ButtonStyleUtil.applyDangerStyle(cancelBtn);
+            cancelBtn.addActionListener(e -> cancelSession());
             buttonPanel.add(cancelBtn);
         } else if (currentUser.getRole() == UserRole.MENTEE) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
             JButton feedbackBtn = new JButton("Leave Feedback");
+            ButtonStyleUtil.applySuccessStyle(feedbackBtn);
             feedbackBtn.addActionListener(e -> leaveFeedback());
             buttonPanel.add(feedbackBtn);
         }

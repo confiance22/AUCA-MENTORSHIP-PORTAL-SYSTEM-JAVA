@@ -3,10 +3,11 @@ package view;
 import model.Notification;
 import model.User;
 import util.ServiceRegistry;
+import util.TableStyleUtil;
+import util.ButtonStyleUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import util.TableStyleUtil;
 import java.util.List;
 
 public class NotificationModule extends JPanel {
@@ -41,17 +42,25 @@ public class NotificationModule extends JPanel {
         // Buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton refreshBtn = new JButton("Refresh");
+        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
+        
         JButton markReadBtn = new JButton("Mark as Read");
+        ButtonStyleUtil.applySuccessStyle(markReadBtn);
+        
         JButton markAllReadBtn = new JButton("Mark All Read");
+        ButtonStyleUtil.applyPrimaryStyle(markAllReadBtn);
         
         refreshBtn.addActionListener(e -> loadNotifications());
         markReadBtn.addActionListener(e -> markAsRead());
         markAllReadBtn.addActionListener(e -> markAllRead());
         
         buttonPanel.add(refreshBtn);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         buttonPanel.add(markReadBtn);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         buttonPanel.add(markAllReadBtn);
         
         add(buttonPanel, BorderLayout.SOUTH);

@@ -2,6 +2,7 @@ package view;
 
 import model.User;
 import util.ServiceRegistry;
+import util.ButtonStyleUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileOutputStream;
@@ -16,19 +17,26 @@ public class ReportModule extends JPanel {
         setBackground(Color.WHITE);
         
         JLabel titleLabel = new JLabel("System Reports & Analytics", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new GridLayout(0, 1, 10, 10));
+        contentPanel.setLayout(new GridLayout(0, 1, 10, 15));
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
         
         JButton usersPdfBtn = new JButton("Export All Users (PDF)");
+        ButtonStyleUtil.applyPrimaryStyle(usersPdfBtn);
+        
         JButton programsExcelBtn = new JButton("Export All Programs (Excel)");
+        ButtonStyleUtil.applySuccessStyle(programsExcelBtn);
+        
         JButton sessionsPdfBtn = new JButton("Export Session Logs (PDF)");
+        ButtonStyleUtil.applyPrimaryStyle(sessionsPdfBtn);
+        
         JButton feedbackPdfBtn = new JButton("Export Session Feedback (PDF)");
+        ButtonStyleUtil.applyPrimaryStyle(feedbackPdfBtn);
         
         contentPanel.add(usersPdfBtn);
         contentPanel.add(programsExcelBtn);
