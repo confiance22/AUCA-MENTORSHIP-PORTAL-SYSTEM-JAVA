@@ -35,6 +35,10 @@ public class LoginController {
         try {
             User user = ServiceRegistry.userService.login(email, password);
             if (user != null) {
+                if (!user.isIsActive()) {
+                    JOptionPane.showMessageDialog(view, "Your account is not active. Please verify your OTP during registration.", "Account Inactive", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 JOptionPane.showMessageDialog(view, "Login Successful! Welcome " + user.getFirstName());
                 view.dispose();
                 DashboardView dashboardView = new DashboardView(user);

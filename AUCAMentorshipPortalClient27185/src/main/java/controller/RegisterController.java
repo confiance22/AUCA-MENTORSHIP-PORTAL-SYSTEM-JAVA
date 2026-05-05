@@ -74,18 +74,22 @@ public class RegisterController {
             newUser.setPassword(password); // Server's registerUserRecord() will hash it
             newUser.setPhoneNumber(phone);
             newUser.setRole(UserRole.valueOf(selectedRole));
-            newUser.setIsActive(true);
+            newUser.setIsActive(false); // User must verify OTP to activate
             newUser.setCreatedAt(LocalDateTime.now());
 
             // Call the RMI service to register
             User registered = ServiceRegistry.userService.registerUserRecord(newUser);
 
             if (registered != null) {
+                // Send OTP
+                ServiceRegistry.notificationService.sendOtpNotification(registered.getId(), registered.getEmail());
+                
                 JOptionPane.showMessageDialog(view,
-                    "Registration successful! Welcome, " + registered.getFirstName() + "!\nYou can now log in.",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                    "Registration successful! An OTP code has been sent to your email.\nPlease verify it to activate your account.",
+                    "Verification Required", JOptionPane.INFORMATION_MESSAGE);
+                
                 view.dispose();
-                new LoginView().setVisible(true);
+                new view.OTPVerificationView(registered).setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(view, "Registration failed. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }

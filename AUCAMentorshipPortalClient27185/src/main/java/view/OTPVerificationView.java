@@ -1,20 +1,27 @@
 package view;
 
+import model.User;
+import model.Notification;
+import util.ServiceRegistry;
 import javax.swing.*;
 import java.awt.*;
 
 public class OTPVerificationView extends JFrame {
 
+    private User userToVerify;
     private JTextField otpField;
     private JButton verifyButton;
 
-    public OTPVerificationView() {
+    public OTPVerificationView(User user) {
+        this.userToVerify = user;
         setTitle("AUCA Mentorship Portal - OTP Verification");
-        setSize(350, 200);
+        setSize(350, 220);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
         initComponents();
+        
+        verifyButton.addActionListener(e -> verifyOtp());
     }
 
     private void initComponents() {
@@ -32,8 +39,13 @@ public class OTPVerificationView extends JFrame {
         gbc.gridwidth = 2;
         mainPanel.add(titleLabel, gbc);
 
-        gbc.gridwidth = 1;
+        JLabel infoLabel = new JLabel("Code sent to: " + userToVerify.getEmail(), SwingConstants.CENTER);
+        infoLabel.setFont(new Font("Arial", Font.PLAIN, 11));
         gbc.gridy = 1;
+        mainPanel.add(infoLabel, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.gridy = 2;
         mainPanel.add(new JLabel("OTP:"), gbc);
 
         otpField = new JTextField(10);
@@ -46,13 +58,40 @@ public class OTPVerificationView extends JFrame {
         verifyButton.setFocusPainted(false);
         
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
         mainPanel.add(verifyButton, gbc);
 
         add(mainPanel);
+    }
+
+    private void verifyOtp() {
+        String code = otpField.getText().trim();
+        if (code.isEmpty()) return;
+
+        try {
+            Notification notif = ServiceRegistry.notificationService.findValidOtpRecord(userToVerify.getId(), code);
+            if (notif != null) {
+                // OTP is correct! Activate user
+                userToVerify.setIsActive(true);
+                ServiceRegistry.userService.updateUserRecord(userToVerify);
+                
+                // Mark OTP as used
+                notif.setUsed(true);
+                ServiceRegistry.notificationService.updateNotificationRecord(notif);
+
+                JOptionPane.showMessageDialog(this, "Account activated successfully! You can now log in.");
+                this.dispose();
+                new LoginView().setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid or expired OTP code. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Connection error: " + ex.getMessage());
+        }
     }
 
     public JTextField getOtpField() {
