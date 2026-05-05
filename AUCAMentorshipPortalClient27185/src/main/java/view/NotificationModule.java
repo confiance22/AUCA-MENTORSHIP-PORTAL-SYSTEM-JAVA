@@ -20,9 +20,9 @@ public class NotificationModule extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
-        JLabel titleLabel = new JLabel("My Notifications", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        JLabel titleLabel = new JLabel("My Notifications", SwingConstants.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         // Table setup - hidden ID column

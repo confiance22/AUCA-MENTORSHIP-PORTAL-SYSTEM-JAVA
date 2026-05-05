@@ -11,6 +11,7 @@ import model.ProgramStatus;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
 import util.ButtonStyleUtil;
+import util.DialogStyleUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -34,9 +35,9 @@ public class ProgramModule extends JPanel {
         else if (currentUser.getRole() == UserRole.MENTOR) title = "My Mentorship Programs";
         else if (currentUser.getRole() == UserRole.ADMIN) title = "All Mentorship Programs";
 
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        JLabel titleLabel = new JLabel(title, SwingConstants.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         // Table setup
@@ -114,17 +115,20 @@ public class ProgramModule extends JPanel {
     }
 
     private void createProgram() {
-        JTextField titleField = new JTextField();
-        JTextField descField = new JTextField();
-        JTextField capacityField = new JTextField("10");
+        JPanel panel = DialogStyleUtil.createStyledPanel();
         
-        Object[] message = {
-            "Program Title:", titleField,
-            "Description:", descField,
-            "Max Capacity:", capacityField,
-        };
+        JTextField titleField = DialogStyleUtil.createStyledTextField("");
+        JTextField descField = DialogStyleUtil.createStyledTextField("");
+        JTextField capacityField = DialogStyleUtil.createStyledTextField("10");
+        
+        panel.add(DialogStyleUtil.createFieldLabel("Program Title:"));
+        panel.add(titleField);
+        panel.add(DialogStyleUtil.createFieldLabel("Description:"));
+        panel.add(descField);
+        panel.add(DialogStyleUtil.createFieldLabel("Max Capacity:"));
+        panel.add(capacityField);
 
-        int option = JOptionPane.showConfirmDialog(this, message, "Create New Mentorship Program", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(this, panel, "Create New Mentorship Program", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             String title = titleField.getText();
             String desc = descField.getText();
@@ -148,7 +152,6 @@ public class ProgramModule extends JPanel {
                 
                 ServiceRegistry.mentorshipProgramService.registerMentorshipProgramRecord(program);
                 
-                // Notify Admins
                 ServiceRegistry.notificationService.notifyAdmins("New Mentorship Program Proposed: " + title + " (by Mentor " + currentUser.getFirstName() + ")");
 
                 JOptionPane.showMessageDialog(this, "Program '" + title + "' created successfully!");

@@ -1,44 +1,112 @@
 package view;
 
 import model.User;
+import util.ServiceRegistry;
+import util.ButtonStyleUtil;
+import util.DialogStyleUtil;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class MentorProfileModule extends JPanel {
     private User currentUser;
+    private JPanel infoContainer;
 
     public MentorProfileModule(User user) {
         this.currentUser = user;
-        setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setLayout(new GridBagLayout());
+        setBackground(new Color(243, 244, 246)); 
         
-        JLabel titleLabel = new JLabel("User Profile Details", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(titleLabel, BorderLayout.NORTH);
+        initComponents();
+    }
 
-        JPanel contentPanel = new JPanel(new GridLayout(6, 2, 10, 10));
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+    private void initComponents() {
+        removeAll();
         
-        contentPanel.add(new JLabel("First Name:"));
-        contentPanel.add(new JLabel(currentUser.getFirstName()));
-        
-        contentPanel.add(new JLabel("Last Name:"));
-        contentPanel.add(new JLabel(currentUser.getLastName()));
-        
-        contentPanel.add(new JLabel("Email:"));
-        contentPanel.add(new JLabel(currentUser.getEmail()));
-        
-        contentPanel.add(new JLabel("Phone:"));
-        contentPanel.add(new JLabel(currentUser.getPhoneNumber()));
-        
-        contentPanel.add(new JLabel("Role:"));
-        contentPanel.add(new JLabel(currentUser.getRole().toString()));
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setPreferredSize(new Dimension(500, 550));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(229, 231, 235), 1),
+            new EmptyBorder(40, 50, 40, 50)
+        ));
 
-        add(contentPanel, BorderLayout.CENTER);
+        JLabel avatar = new JLabel("👤", SwingConstants.CENTER);
+        avatar.setFont(new Font("Segoe UI", Font.PLAIN, 64));
+        avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JButton editBtn = new JButton("Edit Profile");
-        add(editBtn, BorderLayout.SOUTH);
+        JLabel titleLabel = new JLabel("User Profile", SwingConstants.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(17, 24, 39));
+        titleLabel.setBorder(new EmptyBorder(10, 0, 30, 0));
+
+        infoContainer = new JPanel(new GridLayout(0, 2, 10, 20));
+        infoContainer.setBackground(Color.WHITE);
+        infoContainer.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        addInfoRow("First Name", currentUser.getFirstName());
+        addInfoRow("Last Name", currentUser.getLastName());
+        addInfoRow("Email", currentUser.getEmail());
+        addInfoRow("Phone", currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "Not set");
+        addInfoRow("Role", currentUser.getRole().toString());
+
+        JButton editBtn = new JButton("Edit Profile Details");
+        ButtonStyleUtil.applySuccessStyle(editBtn);
+        editBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        editBtn.addActionListener(e -> showEditDialog());
+
+        card.add(avatar);
+        card.add(titleLabel);
+        card.add(infoContainer);
+        card.add(Box.createRigidArea(new Dimension(0, 40)));
+        card.add(editBtn);
+
+        add(card);
+        revalidate();
+        repaint();
+    }
+
+    private void addInfoRow(String label, String value) {
+        JLabel lbl = new JLabel(label + ":");
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lbl.setForeground(new Color(107, 114, 128));
+        
+        JLabel val = new JLabel(value);
+        val.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        val.setForeground(new Color(17, 24, 39));
+        
+        infoContainer.add(lbl);
+        infoContainer.add(val);
+    }
+
+    private void showEditDialog() {
+        JPanel panel = DialogStyleUtil.createStyledPanel();
+        
+        JTextField fName = DialogStyleUtil.createStyledTextField(currentUser.getFirstName());
+        JTextField lName = DialogStyleUtil.createStyledTextField(currentUser.getLastName());
+        JTextField phone = DialogStyleUtil.createStyledTextField(currentUser.getPhoneNumber());
+
+        panel.add(DialogStyleUtil.createFieldLabel("First Name:"));
+        panel.add(fName);
+        panel.add(DialogStyleUtil.createFieldLabel("Last Name:"));
+        panel.add(lName);
+        panel.add(DialogStyleUtil.createFieldLabel("Phone Number:"));
+        panel.add(phone);
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Update Profile Details", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                currentUser.setFirstName(fName.getText().trim());
+                currentUser.setLastName(lName.getText().trim());
+                currentUser.setPhoneNumber(phone.getText().trim());
+
+                ServiceRegistry.userService.updateUserRecord(currentUser);
+                JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+                initComponents(); 
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error updating profile: " + ex.getMessage());
+            }
+        }
     }
 }

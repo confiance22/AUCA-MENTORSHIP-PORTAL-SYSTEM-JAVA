@@ -16,9 +16,9 @@ public class ReportModule extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
-        JLabel titleLabel = new JLabel("System Reports & Analytics", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("System Reports & Analytics", SwingConstants.LEFT);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel();
