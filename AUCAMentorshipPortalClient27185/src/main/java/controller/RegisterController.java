@@ -2,8 +2,6 @@ package controller;
 
 import model.User;
 import model.UserRole;
-import model.Notification;
-import model.NotificationType;
 import util.ServiceRegistry;
 import util.MessageDialogUtil;
 import view.LoginView;
@@ -71,17 +69,8 @@ public class RegisterController {
 
             User registeredUser = ServiceRegistry.userService.registerUserRecord(user);
             if (registeredUser != null) {
-                String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
-                Notification otpNotif = new Notification();
-                otpNotif.setUser(registeredUser);
-                otpNotif.setMessage("Your OTP verification code is: " + otp);
-                otpNotif.setOtpCode(otp);
-                otpNotif.setType(NotificationType.OTP);
-                otpNotif.setCreatedAt(LocalDateTime.now());
-                otpNotif.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-                otpNotif.setUsed(false);
-                otpNotif.setRead(false);
-                ServiceRegistry.notificationService.registerNotificationRecord(otpNotif);
+                // Delegate OTP generation, DB save, and email sending to the server
+                ServiceRegistry.notificationService.sendOtpNotification(registeredUser.getId(), registeredUser.getEmail());
 
                 MessageDialogUtil.showSuccess(view, "Registration successful!\nAn OTP has been sent to your email for verification.");
                 view.dispose();
