@@ -26,22 +26,43 @@ public class MentorshipFeedback implements Serializable {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public MentorshipFeedback() {
-        this.createdAt = LocalDateTime.now();
+    public Long getId() {
+        return id;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public MentorshipSession getSession() { return session; }
-    public void setSession(MentorshipSession session) { this.session = session; }
+    public MentorshipSession getSession() {
+        return session;
+    }
 
-    public int getRating() { return rating; }
-    public void setRating(int rating) { this.rating = rating; }
+    public void setSession(MentorshipSession session) {
+        this.session = session;
+    }
 
-    public String getComment() { return comment; }
-    public void setComment(String comment) { this.comment = comment; }
+    public int getRating() {
+        return rating;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

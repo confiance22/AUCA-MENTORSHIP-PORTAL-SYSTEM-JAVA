@@ -108,16 +108,16 @@ public class Notification implements Serializable {
         return isRead;
     }
 
-    public void setRead(boolean isRead) {
-        this.isRead = isRead;
+    public void setRead(boolean read) {
+        isRead = read;
     }
 
     public boolean isUsed() {
         return isUsed;
     }
 
-    public void setUsed(boolean isUsed) {
-        this.isUsed = isUsed;
+    public void setUsed(boolean used) {
+        isUsed = used;
     }
 
     public LocalDateTime getExpiresAt() {

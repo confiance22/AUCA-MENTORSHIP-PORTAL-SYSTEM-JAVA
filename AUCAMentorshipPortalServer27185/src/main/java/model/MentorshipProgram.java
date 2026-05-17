@@ -75,68 +75,12 @@ public class MentorshipProgram implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public Long getId() {
-        return id;
+    public List<User> getEnrolledUsers() {
+        return enrolledUsers;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getMaxCapacity() {
-        return maxCapacity;
-    }
-
-    public void setMaxCapacity(int maxCapacity) {
-        this.maxCapacity = maxCapacity;
-    }
-
-    public ProgramStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ProgramStatus status) {
-        this.status = status;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
+    public void setEnrolledUsers(List<User> enrolledUsers) {
+        this.enrolledUsers = enrolledUsers;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -147,11 +91,67 @@ public class MentorshipProgram implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public List<User> getEnrolledUsers() {
-        return enrolledUsers;
+    public User getCreatedBy() {
+        return createdBy;
     }
 
-    public void setEnrolledUsers(List<User> enrolledUsers) {
-        this.enrolledUsers = enrolledUsers;
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public ProgramStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProgramStatus status) {
+        this.status = status;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

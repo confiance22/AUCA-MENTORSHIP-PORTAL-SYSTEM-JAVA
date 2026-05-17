@@ -109,8 +109,8 @@ public class MentorProfile implements Serializable {
         return isAvailable;
     }
 
-    public void setAvailable(boolean isAvailable) {
-        this.isAvailable = isAvailable;
+    public void setAvailable(boolean available) {
+        isAvailable = available;
     }
 
     public LocalDateTime getUpdatedAt() {
