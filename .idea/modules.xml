@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA.iml" filepath="$PROJECT_DIR$/.idea/AUCA-MENTORSHIP-PORTAL-SYSTEM-JAVA.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AUCAMentorshipPortalClient27185/AUCAMentorshipPortalClient27185.iml" filepath="$PROJECT_DIR$/AUCAMentorshipPortalClient27185/AUCAMentorshipPortalClient27185.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AUCAMentorshipPortalServer27185/AUCAMentorshipPortalServer27185.iml" filepath="$PROJECT_DIR$/AUCAMentorshipPortalServer27185/AUCAMentorshipPortalServer27185.iml" />
     </modules>
   </component>
 </project>

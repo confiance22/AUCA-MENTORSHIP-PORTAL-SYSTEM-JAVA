@@ -11,6 +11,7 @@ import java.awt.*;
 public class OTPVerificationView extends JFrame {
 
     private User userToVerify;
+    private boolean isLoginFlow;
     private JTextField otpField;
     private JButton verifyButton;
 
@@ -18,8 +19,9 @@ public class OTPVerificationView extends JFrame {
     private final Color BG_COLOR = new Color(243, 244, 246);      
     private final Color TEXT_COLOR = new Color(17, 24, 39);
 
-    public OTPVerificationView(User user) {
+    public OTPVerificationView(User user, boolean isLoginFlow) {
         this.userToVerify = user;
+        this.isLoginFlow = isLoginFlow;
         setTitle("AUCA Mentorship Portal - Identity Verification");
         setSize(450, 480);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -70,7 +72,7 @@ public class OTPVerificationView extends JFrame {
             new EmptyBorder(5, 5, 5, 5)
         ));
 
-        verifyButton = new JButton("Verify & Activate");
+        verifyButton = new JButton(isLoginFlow ? "Verify & Login" : "Verify & Activate");
         verifyButton.setMaximumSize(new Dimension(250, 50));
         verifyButton.setPreferredSize(new Dimension(250, 50));
         verifyButton.setBackground(PRIMARY_COLOR);
@@ -100,17 +102,24 @@ public class OTPVerificationView extends JFrame {
         try {
             Notification notif = ServiceRegistry.notificationService.findValidOtpRecord(userToVerify.getId(), code);
             if (notif != null) {
-                userToVerify.setIsActive(true);
-                ServiceRegistry.userService.updateUserRecord(userToVerify);
+                if (!isLoginFlow) {
+                    userToVerify.setIsActive(true);
+                    ServiceRegistry.userService.updateUserRecord(userToVerify);
+                    ServiceRegistry.notificationService.notifyAdmins("New User Activated: " + userToVerify.getFirstName() + " (" + userToVerify.getRole() + ")");
+                }
                 
                 notif.setUsed(true);
                 ServiceRegistry.notificationService.updateNotificationRecord(notif);
 
-                ServiceRegistry.notificationService.notifyAdmins("New User Activated: " + userToVerify.getFirstName() + " (" + userToVerify.getRole() + ")");
-
-                MessageDialogUtil.showSuccess(this, "Account activated successfully! You can now log in.");
-                this.dispose();
-                new LoginView().setVisible(true);
+                if (isLoginFlow) {
+                    MessageDialogUtil.showSuccess(this, "Login verified successfully! Welcome " + userToVerify.getFirstName());
+                    this.dispose();
+                    new DashboardView(userToVerify).setVisible(true);
+                } else {
+                    MessageDialogUtil.showSuccess(this, "Account activated successfully! You can now log in.");
+                    this.dispose();
+                    new LoginView().setVisible(true);
+                }
             } else {
                 MessageDialogUtil.showError(this, "Invalid or expired OTP code. Please try again.");
             }

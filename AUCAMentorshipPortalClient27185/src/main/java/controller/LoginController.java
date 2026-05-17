@@ -6,6 +6,8 @@ import util.MessageDialogUtil;
 import view.DashboardView;
 import view.LoginView;
 import view.RegisterView;
+import view.OTPVerificationView;
+import model.UserRole;
 import java.awt.event.ActionEvent;
 
 public class LoginController {
@@ -36,9 +38,17 @@ public class LoginController {
                     MessageDialogUtil.showWarning(view, "Your account is not active. Please verify your OTP during registration.");
                     return;
                 }
-                MessageDialogUtil.showSuccess(view, "Login Successful! Welcome " + user.getFirstName());
-                view.dispose();
-                new DashboardView(user).setVisible(true);
+                
+                if (user.getRole() != UserRole.ADMIN) {
+                    ServiceRegistry.notificationService.sendOtpNotification(user.getId(), user.getEmail());
+                    MessageDialogUtil.showSuccess(view, "OTP has been sent to your email for verification.");
+                    view.dispose();
+                    new OTPVerificationView(user, true).setVisible(true);
+                } else {
+                    MessageDialogUtil.showSuccess(view, "Login Successful! Welcome " + user.getFirstName());
+                    view.dispose();
+                    new DashboardView(user).setVisible(true);
+                }
             } else {
                 MessageDialogUtil.showError(view, "Invalid email or password.");
             }

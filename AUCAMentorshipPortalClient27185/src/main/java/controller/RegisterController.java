@@ -74,7 +74,7 @@ public class RegisterController {
 
                 MessageDialogUtil.showSuccess(view, "Registration successful!\nAn OTP has been sent to your email for verification.");
                 view.dispose();
-                new OTPVerificationView(registeredUser).setVisible(true);
+                new OTPVerificationView(registeredUser, false).setVisible(true);
             } else {
                 MessageDialogUtil.showError(view, "Registration failed. Please try again.");
             }

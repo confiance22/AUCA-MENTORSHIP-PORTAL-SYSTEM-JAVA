@@ -10,7 +10,7 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/auca_mentorship_portal_db</property>
         <property name="hibernate.connection.username">postgres</property>
-        <property name="hibernate.connection.password">C123</property>
+        <property name="hibernate.connection.password">123</property>
 
         <!-- Dialect -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
