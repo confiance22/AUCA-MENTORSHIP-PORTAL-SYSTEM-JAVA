@@ -10,7 +10,7 @@ import model.UserRole;
 import model.ProgramStatus;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
-import util.ButtonStyleUtil;
+import util.UITheme;
 import util.DialogStyleUtil;
 import util.MessageDialogUtil;
 import javax.swing.*;
@@ -19,100 +19,230 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ArrayList;
+import com.formdev.flatlaf.FlatClientProperties;
 
 public class ProgramModule extends JPanel {
     private User currentUser;
     private JTable programTable;
     private DefaultTableModel tableModel;
+    private List<MentorshipProgram> allPrograms;
 
     public ProgramModule(User user) {
         this.currentUser = user;
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
-        
+        setOpaque(false);
+
+        // Title text based on role
         String title = "Mentorship Programs";
         if (currentUser.getRole() == UserRole.MENTEE) title = "Browse Mentorship Programs";
         else if (currentUser.getRole() == UserRole.MENTOR) title = "My Mentorship Programs";
         else if (currentUser.getRole() == UserRole.ADMIN) title = "All Mentorship Programs";
 
+        // --- MODERN HEADER PANEL WITH INTEGRATED REAL-TIME SEARCH ---
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
+        JPanel leftHeaderPanel = new JPanel();
+        leftHeaderPanel.setOpaque(false);
+        leftHeaderPanel.setLayout(new BoxLayout(leftHeaderPanel, BoxLayout.X_AXIS));
+
         JLabel titleLabel = new JLabel(title, SwingConstants.LEFT);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 0));
-        add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        leftHeaderPanel.add(titleLabel);
 
-        // Table setup
+        // Responsive Search Input Field (For Mentee/All Roles)
+        leftHeaderPanel.add(Box.createRigidArea(new Dimension(25, 0)));
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(220, 34));
+        searchField.setMaximumSize(new Dimension(220, 34));
+        searchField.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        searchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search by title or mentor...");
+        searchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        searchField.putClientProperty(FlatClientProperties.STYLE, 
+            "background: #16171D; " +
+            "foreground: #F3F4F6; " +
+            "arc: 8; " +
+            "borderWidth: 1; " +
+            "borderColor: #262930; " +
+            "focusColor: #2563EB; " +
+            "focusedBorderColor: #2563EB"
+        );
+        JLabel searchIcon = new JLabel("  ⌕  "); // Universal 16-bit magnifying symbol
+        searchIcon.setForeground(new Color(156, 163, 175));
+        searchField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, searchIcon);
+
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filterPrograms(searchField.getText()); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filterPrograms(searchField.getText()); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterPrograms(searchField.getText()); }
+        });
+
+        leftHeaderPanel.add(searchField);
+        headerPanel.add(leftHeaderPanel, BorderLayout.WEST);
+
+        // Buttons panel in the top-right header area
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setPreferredSize(new Dimension(100, 34));
+        refreshBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        refreshBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshBtn.putClientProperty(FlatClientProperties.STYLE, 
+            "background: #16171D; " +
+            "foreground: #9CA3AF; " +
+            "arc: 8; " +
+            "hoverBackground: #262930; " +
+            "hoverForeground: #F3F4F6; " +
+            "borderWidth: 1; " +
+            "borderColor: #262930; " +
+            "focusWidth: 0"
+        );
+        refreshBtn.addActionListener(e -> loadPrograms());
+        buttonPanel.add(refreshBtn);
+
+        if (currentUser.getRole() == UserRole.MENTOR) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton createBtn = new JButton("+ Create Program");
+            createBtn.setPreferredSize(new Dimension(140, 34));
+            createBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            createBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            createBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #10B981; " +
+                "foreground: #FFFFFF; " +
+                "arc: 8; " +
+                "hoverBackground: #059669; " +
+                "focusedBackground: #10B981; " +
+                "borderWidth: 0; " +
+                "focusWidth: 0"
+            );
+            createBtn.addActionListener(e -> createProgram());
+            buttonPanel.add(createBtn);
+        } else if (currentUser.getRole() == UserRole.MENTEE) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton enrollBtn = new JButton("Enroll");
+            enrollBtn.setPreferredSize(new Dimension(100, 34));
+            enrollBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            enrollBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            enrollBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #10B981; " +
+                "foreground: #FFFFFF; " +
+                "arc: 8; " +
+                "hoverBackground: #059669; " +
+                "focusedBackground: #10B981; " +
+                "borderWidth: 0; " +
+                "focusWidth: 0"
+            );
+            enrollBtn.addActionListener(e -> enrollInProgram());
+            buttonPanel.add(enrollBtn);
+            
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton bookBtn = new JButton("Book Session");
+            bookBtn.setPreferredSize(new Dimension(130, 34));
+            bookBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            bookBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            bookBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #4F46E5; " +
+                "foreground: #FFFFFF; " +
+                "arc: 8; " +
+                "hoverBackground: #4338CA; " +
+                "focusedBackground: #4F46E5; " +
+                "borderWidth: 0; " +
+                "focusWidth: 0"
+            );
+            bookBtn.addActionListener(e -> bookSession());
+            buttonPanel.add(bookBtn);
+        } else if (currentUser.getRole() == UserRole.ADMIN) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton deleteBtn = new JButton("Delete Selected");
+            deleteBtn.setPreferredSize(new Dimension(140, 34));
+            deleteBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            deleteBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            deleteBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #16171D; " +
+                "foreground: #EF4444; " +
+                "arc: 8; " +
+                "hoverBackground: #EF4444; " +
+                "hoverForeground: #FFFFFF; " +
+                "borderWidth: 1; " +
+                "borderColor: #EF4444; " +
+                "focusWidth: 0"
+            );
+            deleteBtn.addActionListener(e -> deleteProgram());
+            buttonPanel.add(deleteBtn);
+        }
+        headerPanel.add(buttonPanel, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
+
+        // --- MODERN FLOATING TABLE PANEL ---
         String[] columnNames = {"ID", "Title", "Mentor", "Start Date", "End Date", "Status"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         programTable = new JTable(tableModel);
-        TableStyleUtil.applyCustomStyle(programTable);
-        add(new JScrollPane(programTable), BorderLayout.CENTER);
-
-        // Buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        TableStyleUtil.applyCustomStyle(programTable, currentUser.getRole());
         
-        JButton refreshBtn = new JButton("Refresh");
-        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
-        refreshBtn.addActionListener(e -> loadPrograms());
-        buttonPanel.add(refreshBtn);
-
-        if (currentUser.getRole() == UserRole.MENTOR) {
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton createBtn = new JButton("Create New Program");
-            ButtonStyleUtil.applySuccessStyle(createBtn);
-            createBtn.addActionListener(e -> createProgram());
-            buttonPanel.add(createBtn);
-        } else if (currentUser.getRole() == UserRole.MENTEE) {
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton enrollBtn = new JButton("Enroll in Program");
-            ButtonStyleUtil.applySuccessStyle(enrollBtn);
-            enrollBtn.addActionListener(e -> enrollInProgram());
-            buttonPanel.add(enrollBtn);
-            
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton bookBtn = new JButton("Book Session");
-            ButtonStyleUtil.applyPrimaryStyle(bookBtn);
-            bookBtn.addActionListener(e -> bookSession());
-            buttonPanel.add(bookBtn);
-        } else if (currentUser.getRole() == UserRole.ADMIN) {
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton deleteBtn = new JButton("Delete Selected");
-            ButtonStyleUtil.applyDangerStyle(deleteBtn);
-            deleteBtn.addActionListener(e -> deleteProgram());
-            buttonPanel.add(deleteBtn);
-        }
+        JScrollPane scrollPane = new JScrollPane(programTable);
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setOpaque(false);
+        tableContainer.setBorder(BorderFactory.createEmptyBorder(0, 25, 25, 25));
+        tableContainer.add(scrollPane, BorderLayout.CENTER);
         
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(tableContainer, BorderLayout.CENTER);
 
         loadPrograms();
     }
 
     private void loadPrograms() {
         try {
-            List<MentorshipProgram> programs;
             if (currentUser.getRole() == UserRole.MENTOR) {
-                programs = ServiceRegistry.mentorshipProgramService.findMentorshipProgramRecordsByUserId(currentUser.getId());
+                allPrograms = ServiceRegistry.mentorshipProgramService.findMentorshipProgramRecordsByUserId(currentUser.getId());
             } else {
-                programs = ServiceRegistry.mentorshipProgramService.findAllMentorshipProgramRecords();
+                allPrograms = ServiceRegistry.mentorshipProgramService.findAllMentorshipProgramRecords();
             }
-            
-            tableModel.setRowCount(0);
-            if (programs != null) {
-                for (MentorshipProgram p : programs) {
-                    tableModel.addRow(new Object[]{
-                        p.getId(), p.getTitle(), p.getCreatedBy() != null ? p.getCreatedBy().getFirstName() : "System",
-                        p.getStartDate(), p.getEndDate(), p.getStatus()
-                    });
-                }
-            }
+            displayPrograms(allPrograms);
         } catch (Exception ex) {
             MessageDialogUtil.showError(this, "Error loading programs: " + ex.getMessage());
         }
+    }
+
+    private void displayPrograms(List<MentorshipProgram> programs) {
+        tableModel.setRowCount(0);
+        if (programs != null) {
+            for (MentorshipProgram p : programs) {
+                tableModel.addRow(new Object[]{
+                    p.getId(), p.getTitle(), p.getCreatedBy() != null ? p.getCreatedBy().getFirstName() : "System",
+                    p.getStartDate(), p.getEndDate(), p.getStatus()
+                });
+            }
+        }
+    }
+
+    private void filterPrograms(String query) {
+        if (allPrograms == null) return;
+        if (query == null || query.trim().isEmpty()) {
+            displayPrograms(allPrograms);
+            return;
+        }
+        
+        String lowerQuery = query.toLowerCase().trim();
+        java.util.List<MentorshipProgram> filtered = new java.util.ArrayList<>();
+        for (MentorshipProgram p : allPrograms) {
+            String title = p.getTitle() != null ? p.getTitle().toLowerCase() : "";
+            String mentorName = (p.getCreatedBy() != null && p.getCreatedBy().getFirstName() != null) ? p.getCreatedBy().getFirstName().toLowerCase() : "";
+            
+            if (title.contains(lowerQuery) || mentorName.contains(lowerQuery)) {
+                filtered.add(p);
+            }
+        }
+        displayPrograms(filtered);
     }
 
     private void createProgram() {

@@ -12,19 +12,19 @@ public class MessageDialogUtil {
     private static final Color WARNING_COLOR = new Color(245, 158, 11);
 
     public static void showSuccess(Component parent, String message) {
-        showCustomDialog(parent, "Success", message, "✅", SUCCESS_COLOR);
+        showCustomDialog(parent, "Success", message, "✓", SUCCESS_COLOR); // Minimalist checkmark
     }
 
     public static void showError(Component parent, String message) {
-        showCustomDialog(parent, "Error", message, "❌", ERROR_COLOR);
+        showCustomDialog(parent, "Error", message, "✕", ERROR_COLOR); // Minimalist cross
     }
 
     public static void showWarning(Component parent, String message) {
-        showCustomDialog(parent, "Warning", message, "⚠️", WARNING_COLOR);
+        showCustomDialog(parent, "Warning", message, "⚠", WARNING_COLOR); // Minimalist warning
     }
 
     public static void showMessage(Component parent, String message) {
-        showCustomDialog(parent, "Notification", message, "ℹ️", PRIMARY_COLOR);
+        showCustomDialog(parent, "Notification", message, "ℹ", PRIMARY_COLOR); // Minimalist info
     }
 
     public static String showInput(Component parent, String message, String title) {
@@ -43,62 +43,53 @@ public class MessageDialogUtil {
     private static JPanel createStyledPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
         return panel;
     }
 
     private static JLabel createFieldLabel(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        label.setForeground(new Color(55, 65, 81));
-        label.setBorder(new EmptyBorder(10, 0, 5, 0));
+        label.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        label.setBorder(new EmptyBorder(5, 0, 5, 0));
         return label;
     }
 
     private static JTextField createStyledTextField(String initialValue) {
         JTextField field = new JTextField(initialValue);
-        field.setPreferredSize(new Dimension(300, 38));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(209, 213, 219), 1),
-            new EmptyBorder(5, 10, 5, 10)
-        ));
+        field.setPreferredSize(new Dimension(220, 34)); // Ultra-compact search/input field
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         return field;
     }
 
     public static int showConfirm(Component parent, String message, String title) {
-        JPanel panel = new JPanel(new BorderLayout(15, 15));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel(new BorderLayout(10, 8));
+        panel.setBorder(new EmptyBorder(6, 10, 6, 10));
 
-        JLabel iconLabel = new JLabel("❓");
-        iconLabel.setFont(new Font("Segoe UI", Font.PLAIN, 32));
+        JLabel iconLabel = new JLabel("?");
+        iconLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        iconLabel.setForeground(PRIMARY_COLOR);
         panel.add(iconLabel, BorderLayout.WEST);
 
-        JLabel msgLabel = new JLabel("<html><div style='width: 250px;'>" + message + "</div></html>");
-        msgLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JLabel msgLabel = new JLabel("<html><div style='width: 210px;'>" + message + "</div></html>");
+        msgLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         panel.add(msgLabel, BorderLayout.CENTER);
 
         return JOptionPane.showConfirmDialog(parent, panel, title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
-    private static void showCustomDialog(Component parent, String title, String message, String emoji, Color themeColor) {
-        JPanel panel = new JPanel(new BorderLayout(20, 20));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(15, 15, 15, 15));
+    private static void showCustomDialog(Component parent, String title, String message, String symbol, Color themeColor) {
+        JPanel panel = new JPanel(new BorderLayout(12, 10));
+        panel.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        JLabel iconLabel = new JLabel(emoji);
-        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 42));
+        JLabel iconLabel = new JLabel(symbol);
+        iconLabel.setFont(new Font("Segoe UI", Font.BOLD, 26)); // Balanced, sleek indicator
+        iconLabel.setForeground(themeColor);
         panel.add(iconLabel, BorderLayout.WEST);
 
-        JLabel msgLabel = new JLabel("<html><div style='width: 280px;'>" + message + "</div></html>");
-        msgLabel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-        msgLabel.setForeground(new Color(31, 41, 55));
+        JLabel msgLabel = new JLabel("<html><div style='width: 210px;'>" + message + "</div></html>");
+        msgLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13)); // Clean, standard body font size
         panel.add(msgLabel, BorderLayout.CENTER);
 
-        // Customize the button via UIManager temporarily for this call if possible, 
-        // but simplest is just passing the panel to showMessageDialog.
         JOptionPane.showMessageDialog(parent, panel, title, JOptionPane.PLAIN_MESSAGE);
     }
 }

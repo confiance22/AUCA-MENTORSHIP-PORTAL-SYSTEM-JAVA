@@ -50,6 +50,13 @@
             <version>3.1.0</version>
         </dependency>
 
+        <!-- FlatLaf for Dark Mode -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

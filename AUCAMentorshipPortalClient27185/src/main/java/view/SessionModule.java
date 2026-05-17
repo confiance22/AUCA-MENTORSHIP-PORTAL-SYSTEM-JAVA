@@ -9,13 +9,14 @@ import model.User;
 import model.UserRole;
 import util.ServiceRegistry;
 import util.TableStyleUtil;
-import util.ButtonStyleUtil;
+import util.UITheme;
 import util.MessageDialogUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.formdev.flatlaf.FlatClientProperties;
 
 public class SessionModule extends JPanel {
     private User currentUser;
@@ -25,54 +26,112 @@ public class SessionModule extends JPanel {
     public SessionModule(User user) {
         this.currentUser = user;
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
-        
+        setOpaque(false);
+
+        // --- MODERN HEADER PANEL ---
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
         JLabel titleLabel = new JLabel("Mentorship Sessions", SwingConstants.LEFT);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 0));
-        add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setForeground(UITheme.TEXT_PRIMARY);
+        headerPanel.add(titleLabel, BorderLayout.WEST);
 
-        // Table setup
+        // Relocated Buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setPreferredSize(new Dimension(100, 34));
+        refreshBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        refreshBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshBtn.putClientProperty(FlatClientProperties.STYLE, 
+            "background: #16171D; " +
+            "foreground: #9CA3AF; " +
+            "arc: 8; " +
+            "hoverBackground: #262930; " +
+            "hoverForeground: #F3F4F6; " +
+            "borderWidth: 1; " +
+            "borderColor: #262930; " +
+            "focusWidth: 0"
+        );
+        refreshBtn.addActionListener(e -> loadSessions());
+        buttonPanel.add(refreshBtn);
+
+        if (currentUser.getRole() == UserRole.MENTOR) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton completeBtn = new JButton("Complete");
+            completeBtn.setPreferredSize(new Dimension(110, 34));
+            completeBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            completeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            completeBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #10B981; " +
+                "foreground: #FFFFFF; " +
+                "arc: 8; " +
+                "hoverBackground: #059669; " +
+                "focusedBackground: #10B981; " +
+                "borderWidth: 0; " +
+                "focusWidth: 0"
+            );
+            completeBtn.addActionListener(e -> completeSession());
+            buttonPanel.add(completeBtn);
+
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton cancelBtn = new JButton("Cancel");
+            cancelBtn.setPreferredSize(new Dimension(100, 34));
+            cancelBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            cancelBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            cancelBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #16171D; " +
+                "foreground: #EF4444; " +
+                "arc: 8; " +
+                "hoverBackground: #EF4444; " +
+                "hoverForeground: #FFFFFF; " +
+                "borderWidth: 1; " +
+                "borderColor: #EF4444; " +
+                "focusWidth: 0"
+            );
+            cancelBtn.addActionListener(e -> cancelSession());
+            buttonPanel.add(cancelBtn);
+        } else if (currentUser.getRole() == UserRole.MENTEE) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+            JButton feedbackBtn = new JButton("Leave Feedback");
+            feedbackBtn.setPreferredSize(new Dimension(140, 34));
+            feedbackBtn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            feedbackBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            feedbackBtn.putClientProperty(FlatClientProperties.STYLE, 
+                "background: #4F46E5; " +
+                "foreground: #FFFFFF; " +
+                "arc: 8; " +
+                "hoverBackground: #4338CA; " +
+                "focusedBackground: #4F46E5; " +
+                "borderWidth: 0; " +
+                "focusWidth: 0"
+            );
+            feedbackBtn.addActionListener(e -> leaveFeedback());
+            buttonPanel.add(feedbackBtn);
+        }
+        headerPanel.add(buttonPanel, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
+
+        // --- MODERN FLOATING TABLE PANEL ---
         String[] columnNames = {"ID", "Mentor", "Mentee", "Time", "Status"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         sessionTable = new JTable(tableModel);
-        TableStyleUtil.applyCustomStyle(sessionTable);
-        add(new JScrollPane(sessionTable), BorderLayout.CENTER);
-
-        // Buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        TableStyleUtil.applyCustomStyle(sessionTable, currentUser.getRole());
         
-        JButton refreshBtn = new JButton("Refresh");
-        ButtonStyleUtil.applyPrimaryStyle(refreshBtn);
-        refreshBtn.addActionListener(e -> loadSessions());
-        buttonPanel.add(refreshBtn);
-
-        if (currentUser.getRole() == UserRole.MENTOR) {
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton completeBtn = new JButton("Mark Completed");
-            ButtonStyleUtil.applySuccessStyle(completeBtn);
-            completeBtn.addActionListener(e -> completeSession());
-            buttonPanel.add(completeBtn);
-
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton cancelBtn = new JButton("Cancel Session");
-            ButtonStyleUtil.applyDangerStyle(cancelBtn);
-            cancelBtn.addActionListener(e -> cancelSession());
-            buttonPanel.add(cancelBtn);
-        } else if (currentUser.getRole() == UserRole.MENTEE) {
-            buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-            JButton feedbackBtn = new JButton("Leave Feedback");
-            ButtonStyleUtil.applySuccessStyle(feedbackBtn);
-            feedbackBtn.addActionListener(e -> leaveFeedback());
-            buttonPanel.add(feedbackBtn);
-        }
+        JScrollPane scrollPane = new JScrollPane(sessionTable);
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setOpaque(false);
+        tableContainer.setBorder(BorderFactory.createEmptyBorder(0, 25, 25, 25));
+        tableContainer.add(scrollPane, BorderLayout.CENTER);
         
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(tableContainer, BorderLayout.CENTER);
 
         loadSessions();
     }
