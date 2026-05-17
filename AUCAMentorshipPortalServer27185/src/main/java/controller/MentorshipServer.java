@@ -34,9 +34,9 @@ public class MentorshipServer {
             broker.start();
             System.out.println("Embedded ActiveMQ Broker started on tcp://localhost:61616.");
 
-            // Start RMI Registry on port 1099
-            LocateRegistry.createRegistry(1099);
-            System.out.println("RMI Registry started on port 1099.");
+            // Start RMI Registry on port 5099 (Satisfies Requirement #4: port range 3000-6000)
+            LocateRegistry.createRegistry(5099);
+            System.out.println("RMI Registry started on port 5099.");
 
             // Seed default admin account (creates or repairs broken hash)
             DataSeeder.seed();
@@ -50,14 +50,14 @@ public class MentorshipServer {
             ReportService reportService = new ReportServiceImpl();
             MentorshipFeedbackService feedbackService = new MentorshipFeedbackServiceImpl();
 
-            // Bind services to RMI Registry
-            Naming.rebind("rmi://localhost:1099/UserService", userService);
-            Naming.rebind("rmi://localhost:1099/MentorProfileService", mentorProfileService);
-            Naming.rebind("rmi://localhost:1099/MentorshipProgramService", mentorshipProgramService);
-            Naming.rebind("rmi://localhost:1099/MentorshipSessionService", mentorshipSessionService);
-            Naming.rebind("rmi://localhost:1099/NotificationService", notificationService);
-            Naming.rebind("rmi://localhost:1099/ReportService", reportService);
-            Naming.rebind("rmi://localhost:1099/MentorshipFeedbackService", feedbackService);
+            // Bind services to RMI Registry on port 5099
+            Naming.rebind("rmi://localhost:5099/UserService", userService);
+            Naming.rebind("rmi://localhost:5099/MentorProfileService", mentorProfileService);
+            Naming.rebind("rmi://localhost:5099/MentorshipProgramService", mentorshipProgramService);
+            Naming.rebind("rmi://localhost:5099/MentorshipSessionService", mentorshipSessionService);
+            Naming.rebind("rmi://localhost:5099/NotificationService", notificationService);
+            Naming.rebind("rmi://localhost:5099/ReportService", reportService);
+            Naming.rebind("rmi://localhost:5099/MentorshipFeedbackService", feedbackService);
 
             System.out.println("All services bound successfully to the RMI Registry.");
 

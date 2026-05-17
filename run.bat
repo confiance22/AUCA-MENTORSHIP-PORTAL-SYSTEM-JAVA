@@ -1,7 +1,38 @@
 @echo off
 title AUCA Mentorship Portal - Master Console
-:: Set elegant developer cyan colors
 color 0B
+
+:: 🔍 Intelligent JDK Auto-Detector
+set "VALID_JDK=0"
+if not "%JAVA_HOME%"=="" (
+    if exist "%JAVA_HOME%\bin\javac.exe" (
+        set "VALID_JDK=1"
+    )
+)
+if "%VALID_JDK%"=="0" (
+    if exist "C:\Program Files\Apache NetBeans\jdk" (
+        set "JAVA_HOME=C:\Program Files\Apache NetBeans\jdk"
+        set "PATH=%JAVA_HOME%\bin;%PATH%"
+    )
+)
+
+:: 🔍 Intelligent Maven Auto-Detector
+where mvn >nul 2>nul
+if %errorlevel% neq 0 (
+    if exist "C:\Program Files\Apache NetBeans\java\maven\bin" (
+        set "PATH=%PATH%;C:\Program Files\Apache NetBeans\java\maven\bin"
+    ) else (
+        echo =====================================================================
+        echo [ERROR] Maven (mvn) is not recognized on your system.
+        echo.
+        echo Please ensure Apache NetBeans or Maven is installed.
+        echo If already installed, add Maven's 'bin' folder to your system PATH.
+        echo =====================================================================
+        echo.
+        pause
+        exit
+    )
+)
 
 :menu
 cls
@@ -25,26 +56,27 @@ goto menu
 
 :start_server
 cls
-echo [INFO] Starting AUCA Mentorship Server in a new window...
-start cmd /k "title SERVER - AUCA Mentorship Portal && cd AUCAMentorshipPortalServer27185 && mvn compile exec:java -Dexec.mainClass="controller.MentorshipServer""
+echo [INFO] Starting AUCA Mentorship Server...
+:: Pass our validated environment block down to the subshell
+start cmd /k "title SERVER - AUCA Mentorship Portal && set JAVA_HOME=%JAVA_HOME% && set PATH=%PATH% && cd AUCAMentorshipPortalServer27185 && mvn compile exec:java -Dexec.mainClass=controller.MentorshipServer"
 goto menu
 
 :start_client
 cls
-echo [INFO] Starting AUCA Mentorship Client UI in a new window...
-start cmd /k "title CLIENT - AUCA Mentorship Portal && cd AUCAMentorshipPortalClient27185 && mvn compile exec:java -Dexec.mainClass="MentorshipPortalClient""
+echo [INFO] Starting AUCA Mentorship Client UI...
+start cmd /k "title CLIENT - AUCA Mentorship Portal && set JAVA_HOME=%JAVA_HOME% && set PATH=%PATH% && cd AUCAMentorshipPortalClient27185 && mvn compile exec:java -Dexec.mainClass=MentorshipPortalClient"
 goto menu
 
 :start_both
 cls
 echo [INFO] Step 1: Launching RMI/Database Server...
-start cmd /k "title SERVER - AUCA Mentorship Portal && cd AUCAMentorshipPortalServer27185 && mvn compile exec:java -Dexec.mainClass="controller.MentorshipServer""
+start cmd /k "title SERVER - AUCA Mentorship Portal && set JAVA_HOME=%JAVA_HOME% && set PATH=%PATH% && cd AUCAMentorshipPortalServer27185 && mvn compile exec:java -Dexec.mainClass=controller.MentorshipServer"
 echo.
-echo [INFO] Waiting 4 seconds for Server registry binding to complete...
+echo [INFO] Waiting 4 seconds for Server registry binding...
 timeout /t 4 > nul
 echo.
 echo [INFO] Step 2: Launching Client UI...
-start cmd /k "title CLIENT - AUCA Mentorship Portal && cd AUCAMentorshipPortalClient27185 && mvn compile exec:java -Dexec.mainClass="MentorshipPortalClient""
+start cmd /k "title CLIENT - AUCA Mentorship Portal && set JAVA_HOME=%JAVA_HOME% && set PATH=%PATH% && cd AUCAMentorshipPortalClient27185 && mvn compile exec:java -Dexec.mainClass=MentorshipPortalClient"
 goto menu
 
 :exit

@@ -53,14 +53,14 @@ public class MentorshipPortalClient {
         }
 
         try {
-            // Connect to RMI registry and lookup services
-            ServiceRegistry.userService = (UserService) Naming.lookup("rmi://localhost:1099/UserService");
-            ServiceRegistry.mentorProfileService = (MentorProfileService) Naming.lookup("rmi://localhost:1099/MentorProfileService");
-            ServiceRegistry.mentorshipProgramService = (MentorshipProgramService) Naming.lookup("rmi://localhost:1099/MentorshipProgramService");
-            ServiceRegistry.mentorshipSessionService = (MentorshipSessionService) Naming.lookup("rmi://localhost:1099/MentorshipSessionService");
-            ServiceRegistry.notificationService = (NotificationService) Naming.lookup("rmi://localhost:1099/NotificationService");
-            ServiceRegistry.reportService = (ReportService) Naming.lookup("rmi://localhost:1099/ReportService");
-            ServiceRegistry.mentorshipFeedbackService = (MentorshipFeedbackService) Naming.lookup("rmi://localhost:1099/MentorshipFeedbackService");
+            // Connect to RMI registry and lookup services on port 5099
+            ServiceRegistry.userService = (UserService) Naming.lookup("rmi://localhost:5099/UserService");
+            ServiceRegistry.mentorProfileService = (MentorProfileService) Naming.lookup("rmi://localhost:5099/MentorProfileService");
+            ServiceRegistry.mentorshipProgramService = (MentorshipProgramService) Naming.lookup("rmi://localhost:5099/MentorshipProgramService");
+            ServiceRegistry.mentorshipSessionService = (MentorshipSessionService) Naming.lookup("rmi://localhost:5099/MentorshipSessionService");
+            ServiceRegistry.notificationService = (NotificationService) Naming.lookup("rmi://localhost:5099/NotificationService");
+            ServiceRegistry.reportService = (ReportService) Naming.lookup("rmi://localhost:5099/ReportService");
+            ServiceRegistry.mentorshipFeedbackService = (MentorshipFeedbackService) Naming.lookup("rmi://localhost:5099/MentorshipFeedbackService");
 
             System.out.println("Successfully connected to the AUCA Mentorship Portal Server (RMI)!");
 
